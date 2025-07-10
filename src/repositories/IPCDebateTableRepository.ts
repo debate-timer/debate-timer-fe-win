@@ -25,7 +25,7 @@ class IPCDebateTableRepository {
 
   // Modify the existing item
   async patchTable(item: DebateTableData): Promise<DebateTableData> {
-    return await window.db.post(item);
+    return await window.db.patch(item);
   }
 }
 

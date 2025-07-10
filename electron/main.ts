@@ -69,8 +69,8 @@ ipcMain.handle('db-patch', async (_event, item: DebateTableData) =>
 );
 
 // Launch app
-app.whenReady().then(() => {
-  initDb();
+app.whenReady().then(async () => {
+  await initDb();
   createWindow();
 });
 
