@@ -14,6 +14,7 @@ type Story = StoryObj<typeof ShareModal>;
 
 const shareUrl = createTableShareUrl('https://localhost:6006', {
   info: {
+    id: '1-1-1-1-1',
     agenda: '토론 주제',
     prosTeamName: '짜장',
     consTeamName: '짬뽕',

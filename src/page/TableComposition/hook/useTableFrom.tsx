@@ -20,6 +20,7 @@ const useTableFrom = (
       key: 'creationInfo',
       initialState: {
         info: {
+          id: '1-1-1-1-1',
           name: '',
           agenda: '',
           prosTeamName: '',
@@ -52,6 +53,7 @@ const useTableFrom = (
     setFormData((prev) => {
       const newInfo = typeof action === 'function' ? action(prev.info) : action;
       const debateInfo: DebateInfo = {
+        id: newInfo.id,
         name: newInfo.name,
         agenda: newInfo.agenda,
         warningBell: newInfo.warningBell,

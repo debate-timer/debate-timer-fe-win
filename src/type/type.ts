@@ -32,6 +32,12 @@ export interface TimeBoxInfo {
   speaker: string | null;
 }
 
+export interface DebateTable {
+  id: number;
+  name: string;
+  agenda: string;
+}
+
 export interface DebateInfo {
   id: UUID;
   name: string;
