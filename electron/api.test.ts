@@ -5,7 +5,7 @@ import os from 'os';
 import { getItem, getAllItems, deleteItem, patchItem, postItem } from './api';
 import { DebateTableData } from './type';
 
-// --- 테스트 환경 설정 ---
+// Test data
 const TEST_DIR = path.join(os.tmpdir(), 'electron-db-test');
 const testDbPath = path.join(TEST_DIR, 'test-db.json');
 const ORIGINAL_SAMPLE_DATA: DebateTableData = {
@@ -87,16 +87,16 @@ const ORIGINAL_SAMPLE_DATA: DebateTableData = {
 const SAMPLE_UUID_1 = '79800bb7-70a1-4564-b790-e2148967af7e';
 const SAMPLE_UUID_2 = 'bd818b12-fbb0-405a-8fab-d22d63884e82';
 
-// 테스트용 초기 데이터 (Seed Data)
+// Seed data
 let SEED_DATA: DebateTableData[];
 
 beforeAll(async () => {
-  // 테스트를 위한 임시 디렉토리 생성
+  // Create temporary directory for test suite
   await fs.mkdir(TEST_DIR, { recursive: true });
 });
 
 beforeEach(async () => {
-  // 각 테스트가 실행되기 전에 항상 동일한 초기 데이터로 파일을 덮어씀
+  // Before each test, prepare dataset with pre-defined 2 data
   const SAMPLE_DATA_1 = JSON.parse(JSON.stringify(ORIGINAL_SAMPLE_DATA));
   const SAMPLE_DATA_2 = JSON.parse(JSON.stringify(ORIGINAL_SAMPLE_DATA));
   SAMPLE_DATA_1.info.id = SAMPLE_UUID_1;
@@ -106,11 +106,11 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  // 모든 테스트가 끝난 후 임시 디렉토리와 파일 삭제
+  // Delete all files and temp directory after each test
   await fs.rm(TEST_DIR, { recursive: true, force: true });
 });
 
-// --- 테스트 스위트 ---
+// Test suite
 describe('Database Handlers', () => {
   it('✅ getAllItems: should return all items from the database', async () => {
     const items = await getAllItems(testDbPath);
@@ -126,7 +126,7 @@ describe('Database Handlers', () => {
     });
 
     it('❌ should throw an error for a non-existent ID', async () => {
-      // 존재하지 않는 ID로 요청했을 때 에러가 발생하는지 확인
+      // Check whether it returns when non-existent ID is given
       await expect(getItem(testDbPath, '9-2-3-1-2')).rejects.toThrow(
         'Failed to find item.',
       );
@@ -139,9 +139,9 @@ describe('Database Handlers', () => {
     const createdItem = await postItem(testDbPath, newItem as DebateTableData);
 
     expect(createdItem.info.agenda).toBe('나의 토론 주제');
-    expect(createdItem.info.id).toBeDefined(); // 새 UUID가 할당되었는지 확인
+    expect(createdItem.info.id).toBeDefined(); // Check whether new UUID is assigned to new item
 
-    // 파일의 실제 상태도 확인
+    // Also check the file itself
     const db = JSON.parse(await fs.readFile(testDbPath, 'utf-8'));
     expect(db).toHaveLength(3);
     expect(db[2].info.agenda).toBe('나의 토론 주제');
@@ -155,7 +155,7 @@ describe('Database Handlers', () => {
       updatedDb.find((item) => item.info.id === SAMPLE_UUID_1),
     ).toBeUndefined();
 
-    // 파일의 실제 상태도 확인
+    // Also check the file itself
     const db = JSON.parse(await fs.readFile(testDbPath, 'utf-8'));
     expect(db).toHaveLength(1);
   });
@@ -169,11 +169,11 @@ describe('Database Handlers', () => {
 
     expect(updatedItem.info.agenda).toBe('새로운 토론 주제');
 
-    // 파일의 실제 상태도 확인
+    // Also check the file itself
     const db = JSON.parse(await fs.readFile(testDbPath, 'utf-8'));
     const itemInDb = db.find((item) => item.info.id === SAMPLE_UUID_1);
 
-    expect(db).toHaveLength(2); // 전체 길이는 그대로인지 확인
+    expect(db).toHaveLength(2); // Check whether array length is not changed
     expect(itemInDb.info.agenda).toBe('새로운 토론 주제');
   });
 });

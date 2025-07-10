@@ -2,7 +2,8 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { DebateTableData } from './type';
 import { UUID } from 'crypto';
 
-// Only expose under items to the renderer
+// IPC Preloads
+// - Main(Electron) will only expose under items to the renderer(React).
 interface DB_API {
   get: (id: UUID) => Promise<DebateTableData>;
   getAll: () => Promise<DebateTableData[]>;
