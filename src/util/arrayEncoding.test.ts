@@ -9,6 +9,7 @@ import {
 describe('토론 테이블 인코딩 유틸리티', () => {
   const sampleData: DebateTableData = {
     info: {
+      id: '1-1-1-1-1',
       name: '나의 자유토론 테이블',
       agenda: '토론 주제',
       prosTeamName: '찬성',

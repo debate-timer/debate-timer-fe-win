@@ -2,6 +2,7 @@ import { DebateTableData } from '../type/type';
 
 export const SAMPLE_TABLE_DATA: DebateTableData = {
   info: {
+    id: '1-1-1-1-1',
     agenda: '나의 토론 주제',
     name: '나의 시간표',
     prosTeamName: '찬성',
