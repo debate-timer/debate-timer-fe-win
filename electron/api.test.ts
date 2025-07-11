@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import { getItem, getAllItems, deleteItem, patchItem, postItem } from './api';
 import { DebateTableData } from './type';
+import '@testing-library/jest-dom';
 
 // Test data
 const TEST_DIR = path.join(os.tmpdir(), 'electron-db-test');

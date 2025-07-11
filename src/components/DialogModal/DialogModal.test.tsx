@@ -1,5 +1,5 @@
 import { GlobalPortal } from '../../util/GlobalPortal';
-import { MemoryRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import DialogModal from './DialogModal';
 import { expect } from 'vitest';
@@ -7,7 +7,7 @@ import { expect } from 'vitest';
 function TestWrapper({ children }: { children: React.ReactNode }) {
   return (
     <GlobalPortal.Provider>
-      <MemoryRouter>{children}</MemoryRouter>
+      <HashRouter>{children}</HashRouter>
     </GlobalPortal.Provider>
   );
 }

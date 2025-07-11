@@ -2,7 +2,6 @@ import { defineConfig as defineViteConfig, loadEnv, mergeConfig } from 'vite';
 import { defineConfig as defineVitestConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import electron from 'vite-plugin-electron';
-import renderer from 'vite-plugin-electron-renderer';
 
 const viteConfig = defineViteConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -41,7 +40,6 @@ const viteConfig = defineViteConfig(({ mode }) => {
           },
         },
       ]),
-      renderer(),
     ],
     server: {
       proxy: {
@@ -64,6 +62,7 @@ const vitestConfig = defineVitestConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: './src/setup.ts',
   },
 });
 

@@ -1,4 +1,8 @@
-import { createHashRouter } from 'react-router-dom';
+import {
+  createHashRouter,
+  createMemoryRouter,
+  RouteObject,
+} from 'react-router-dom';
 import TableListPage from '../page/TableListPage/TableListPage';
 import TableOverview from '../page/TableOverviewPage/TableOverview';
 import TableComposition from '../page/TableComposition/TableComposition';
@@ -29,7 +33,14 @@ const routesConfig = [
   },
 ];
 
-const router = createHashRouter([
+const getProperRouter = (routes: RouteObject[]) => {
+  const isTest = process.env.NODE_ENV === 'test';
+  return isTest
+    ? createMemoryRouter(routes)
+    : createHashRouter(routes, { basename: '/' });
+};
+
+const router = getProperRouter([
   {
     element: (
       <>
