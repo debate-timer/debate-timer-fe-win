@@ -25,11 +25,11 @@ const mockDbApi = {
     return Promise.resolve(mockInitialData);
   }),
 
-  get: vi.fn(async (_id: UUID) => {
+  get: vi.fn(async (id: UUID) => {
     const item = mockInitialData.find((d) => d.info.id === SAMPLE_UUID_1);
     return item
       ? Promise.resolve(item)
-      : Promise.reject(new Error('Item not found'));
+      : Promise.reject(new Error(`Item not found: ${id.length}`));
   }),
 
   post: vi.fn(async (item: DebateTableData) => {
