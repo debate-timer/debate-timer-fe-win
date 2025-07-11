@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GlobalPortal } from '../../util/GlobalPortal';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
@@ -6,13 +5,10 @@ import DialogModal from './DialogModal';
 import { expect } from 'vitest';
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <GlobalPortal.Provider>
-        <MemoryRouter>{children}</MemoryRouter>
-      </GlobalPortal.Provider>
-    </QueryClientProvider>
+    <GlobalPortal.Provider>
+      <MemoryRouter>{children}</MemoryRouter>
+    </GlobalPortal.Provider>
   );
 }
 

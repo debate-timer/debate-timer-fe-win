@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GlobalPortal } from '../../util/GlobalPortal';
 import TableComposition from './TableComposition';
@@ -16,24 +15,21 @@ function TestWrapper({
   children: React.ReactNode;
   initialEntries?: string[];
 }) {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <GlobalPortal.Provider>
-        <MemoryRouter initialEntries={initialEntries}>
-          <Routes>
-            {/* TableComposition 테스트 경로 */}
-            <Route path="/composition" element={children} />
+    <GlobalPortal.Provider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          {/* TableComposition 테스트 경로 */}
+          <Route path="/composition" element={children} />
 
-            {/* 실제로 이동하고 싶은 /overview 경로 - 테스트용 컴포넌트 */}
-            <Route
-              path="/overview/customize/1"
-              element={<h1 data-testid="overview-page">Overview Page</h1>}
-            />
-          </Routes>
-        </MemoryRouter>
-      </GlobalPortal.Provider>
-    </QueryClientProvider>
+          {/* 실제로 이동하고 싶은 /overview 경로 - 테스트용 컴포넌트 */}
+          <Route
+            path="/overview/customize/1"
+            element={<h1 data-testid="overview-page">Overview Page</h1>}
+          />
+        </Routes>
+      </MemoryRouter>
+    </GlobalPortal.Provider>
   );
 }
 
