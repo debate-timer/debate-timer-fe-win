@@ -30,5 +30,5 @@ class IPCDebateTableRepository {
 }
 
 // Create singleton instance and expose it only
-const fileDebateTableRepository = new IPCDebateTableRepository();
-export default fileDebateTableRepository;
+const repository = new IPCDebateTableRepository();
+export default repository;
