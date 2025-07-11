@@ -6,19 +6,9 @@ const mockTimerInstance = {
   totalTimer: 150,
   speakingTimer: 50,
   isRunning: false,
-  isDone: false,
-  defaultTime: { defaultTotalTimer: 150, defaultSpeakingTimer: 50 },
-  isSpeakingTimer: true,
   startTimer: () => {},
   pauseTimer: () => {},
-  resetTimerForNextPhase: () => {},
   resetCurrentTimer: () => {},
-  setTimers: () => {},
-  setSavedTime: () => {},
-  setDefaultTime: () => {},
-  setIsSpeakingTimer: () => {},
-  setIsDone: () => {},
-  clearTimer: () => {},
 };
 
 const meta: Meta<typeof TimeBasedTimer> = {

@@ -41,8 +41,13 @@ export default function TableComposition() {
     return undefined;
   }, [mode, data]);
 
-  const { formData, updateInfo, updateTable, AddTable, EditTable } =
-    useTableFrom(currentStep, initData);
+  const {
+    formData,
+    updateInfo,
+    updateTable,
+    addTable: AddTable,
+    editTable: EditTable,
+  } = useTableFrom(currentStep, initData);
 
   const handleButtonClick = () => {
     const patchedInfo = {

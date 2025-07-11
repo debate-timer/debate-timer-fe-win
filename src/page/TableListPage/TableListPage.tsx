@@ -24,8 +24,8 @@ export default function TableListPage() {
   const onClick = (tableId: UUID) => {
     navigate(`/overview/customize/${tableId}`);
   };
-  const onDelete = (tableId: UUID) => {
-    repo.deleteTable(tableId);
+  const onDelete = async (tableId: UUID) => {
+    await repo.deleteTable(tableId);
     getAllTables(); // Ensure refreshing after deleting item
   };
 

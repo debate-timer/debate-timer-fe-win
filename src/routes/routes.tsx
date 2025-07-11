@@ -36,7 +36,7 @@ const routesConfig = [
 const getProperRouter = (routes: RouteObject[]) => {
   const isTest = process.env.NODE_ENV === 'test';
   return isTest
-    ? createMemoryRouter(routes)
+    ? createMemoryRouter(routes, { basename: '/' })
     : createHashRouter(routes, { basename: '/' });
 };
 

@@ -93,14 +93,14 @@ const useTableFrom = (
     navigate(`/overview/customize/${modifiedItem.info.id}`);
   };
 
-  const AddTable = () => {
+  const addTable = () => {
     onAddTable({
       info: formData.info,
       table: formData.table as TimeBoxInfo[],
     });
   };
 
-  const EditTable = (tableId: UUID) => {
+  const editTable = (tableId: UUID) => {
     onModifyTable({
       info: { ...formData.info, id: tableId },
       table: formData.table as TimeBoxInfo[],
@@ -111,8 +111,8 @@ const useTableFrom = (
     formData,
     updateInfo,
     updateTable,
-    AddTable,
-    EditTable,
+    addTable,
+    editTable,
   };
 };
 
