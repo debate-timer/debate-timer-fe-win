@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createHashRouter } from 'react-router-dom';
 import TableListPage from '../page/TableListPage/TableListPage';
 import TableOverview from '../page/TableOverviewPage/TableOverview';
 import TableComposition from '../page/TableComposition/TableComposition';
@@ -10,33 +10,32 @@ const routesConfig = [
   {
     path: '/',
     element: <TableListPage />,
-    requiresAuth: true,
   },
   {
     path: '/composition',
     element: <TableComposition />,
-    requiresAuth: false,
   },
   {
     path: '/overview/:type/:id',
     element: <TableOverview />,
-    requiresAuth: false,
   },
   {
     path: '/table/customize/:id',
     element: <TimerPage />,
-    requiresAuth: false,
   },
   {
     path: '*',
     element: <NotFoundPage />,
-    requiresAuth: false,
   },
 ];
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
-    element: <ErrorBoundaryWrapper />,
+    element: (
+      <>
+        <ErrorBoundaryWrapper />
+      </>
+    ),
     children: routesConfig.map((route) => ({
       ...route,
       element: route.element,
