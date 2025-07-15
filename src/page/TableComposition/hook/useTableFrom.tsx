@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useNavigationType } from 'react-router-dom';
 import { TableCompositionStep } from '../TableComposition';
 import useBrowserStorage from '../../../hooks/useBrowserStorage';
 import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../../type/type';
 import { UUID } from 'crypto';
 import repository from '../../../repositories/IPCDebateTableRepository';
+import useAsyncRequest from '../../../repositories/useAsyncRequest';
 
 const useTableFrom = (
   currentStep: TableCompositionStep,
@@ -12,6 +13,14 @@ const useTableFrom = (
 ) => {
   const navigationType = useNavigationType();
   const navigate = useNavigate();
+
+  const { execute: postTable, isLoading: postLoading } = useAsyncRequest(
+    repository.postTable,
+  );
+  const { execute: patchTable, isLoading: patchLoading } = useAsyncRequest(
+    repository.patchTable,
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
   // Set default value as CUSTOMIZE to prevent users to make PARLIAMENTARY tables
   const [formData, setFormData, removeValue] =
@@ -82,15 +91,25 @@ const useTableFrom = (
   };
 
   const onAddTable = async (item: DebateTableData) => {
-    const addedItem = await repository.postTable(item);
-    removeValue();
-    navigate(`/overview/customize/${addedItem.info.id}`);
+    const response = await postTable(item);
+
+    if (response.success) {
+      await removeValue();
+      navigate(`/overview/customize/${response.data.info.id}`);
+    } else {
+      throw new Error('테이블 추가에 실패했어요.');
+    }
   };
 
   const onModifyTable = async (item: DebateTableData) => {
-    const modifiedItem = await repository.patchTable(item);
-    removeValue();
-    navigate(`/overview/customize/${modifiedItem.info.id}`);
+    const response = await patchTable(item);
+
+    if (response.success) {
+      await removeValue();
+      navigate(`/overview/customize/${response.data.info.id}`);
+    } else {
+      throw new Error('테이블 수정에 실패했어요.');
+    }
   };
 
   const addTable = () => {
@@ -107,12 +126,17 @@ const useTableFrom = (
     });
   };
 
+  useEffect(() => {
+    setIsLoading(postLoading || patchLoading);
+  }, [postLoading, patchLoading]);
+
   return {
     formData,
     updateInfo,
     updateTable,
     addTable,
     editTable,
+    isLoading,
   };
 };
 

@@ -31,12 +31,18 @@ export default function TableComposition() {
   const {
     error,
     execute: getTable,
-    isLoading,
+    isLoading: getLoading,
   } = useAsyncRequest(repository.getTable);
   const [initData, setInitData] = useState<DebateTableData>();
 
-  const { formData, updateInfo, updateTable, addTable, editTable } =
-    useTableFrom(currentStep, initData);
+  const {
+    formData,
+    updateInfo,
+    updateTable,
+    addTable,
+    editTable,
+    isLoading: postPatchLoading,
+  } = useTableFrom(currentStep, initData);
 
   const handleButtonClick = () => {
     const patchedInfo = {
@@ -80,8 +86,8 @@ export default function TableComposition() {
 
   return (
     <DefaultLayout>
-      {isLoading && <LoadingIndicator />}
-      {!isLoading && error && (
+      {getLoading && <LoadingIndicator />}
+      {!getLoading && error && (
         <ErrorIndicator
           onClickRetry={() => {
             if (!isUUID(id)) {
@@ -91,7 +97,7 @@ export default function TableComposition() {
           }}
         />
       )}
-      {!isLoading && !error && (
+      {!getLoading && !error && (
         <Funnel
           step={{
             NameAndType: (
@@ -109,6 +115,7 @@ export default function TableComposition() {
                 onTimeBoxChange={updateTable}
                 onFinishButtonClick={handleButtonClick}
                 onEditTableInfoButtonClick={() => goToStep('NameAndType')}
+                isLoading={postPatchLoading}
               />
             ),
           }}
