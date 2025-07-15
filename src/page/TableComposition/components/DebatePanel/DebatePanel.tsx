@@ -60,8 +60,8 @@ export default function DebatePanel(props: DebatePanelProps) {
 
   const renderDragHandle = () => (
     <div
-      className={`${isPros ? 'right-2' : 'left-2'} absolute top-4 flex h-2/3 w-4 flex-1 cursor-grab items-center 
-                justify-center rounded-md bg-neutral-0 hover:bg-neutral-300`}
+      className={`${isPros ? 'right-2' : 'left-2'} bg-neutral-0 absolute top-4 flex h-2/3 w-4 flex-1 cursor-grab 
+                items-center justify-center rounded-md hover:bg-neutral-300`}
       onMouseDown={onMouseDown}
       title="위아래로 드래그"
     >
@@ -72,7 +72,7 @@ export default function DebatePanel(props: DebatePanelProps) {
     <div
       className={`relative flex w-1/2 flex-col items-center justify-center rounded-md ${
         isPros ? 'bg-camp-blue' : 'bg-camp-red'
-      } h-20 select-none p-2 font-bold text-neutral-0`}
+      } text-neutral-0 h-20 select-none p-2 font-bold`}
     >
       {onSubmitEdit && onSubmitDelete && (
         <>
@@ -134,7 +134,7 @@ export default function DebatePanel(props: DebatePanelProps) {
   );
 
   const renderNeutralCustomPanel = () => (
-    <div className="relative flex h-20 w-full flex-col items-center justify-center rounded-md bg-brand-main p-2 font-medium ">
+    <div className="bg-brand-main relative flex h-20 w-full flex-col items-center justify-center rounded-md p-2 font-medium ">
       {onSubmitEdit && onSubmitDelete && (
         <>
           {renderDragHandle()}

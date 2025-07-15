@@ -13,7 +13,7 @@ export default function RoundControlButton({
 }: RoundControlButtonProps) {
   return (
     <button
-      className="flex h-[50px] w-[150px] flex-row items-center justify-center space-x-2 rounded-full border-[1px] border-neutral-300 bg-neutral-200 shadow-lg hover:bg-brand-main lg:h-[60px] lg:w-[170px] xl:h-[68px] xl:w-[200px]"
+      className="hover:bg-brand-main flex h-[50px] w-[150px] flex-row items-center justify-center space-x-2 rounded-full border-[1px] border-neutral-300 bg-neutral-200 shadow-lg lg:h-[60px] lg:w-[170px] xl:h-[68px] xl:w-[200px]"
       onClick={() => onClick()}
     >
       {type === 'PREV' && (

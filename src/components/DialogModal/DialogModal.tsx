@@ -52,7 +52,7 @@ export default function DialogModal({
         {/** Right button */}
         <button
           data-testid="button-right"
-          className="w-1/2 py-4 hover:bg-brand-main"
+          className="hover:bg-brand-main w-1/2 py-4"
           onClick={() => right.onClick()}
         >
           <p

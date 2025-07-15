@@ -26,7 +26,7 @@ export default function TimerController({
     >
       <div className="flex size-full flex-1 items-center justify-end ">
         <button
-          className="size-[60px] rounded-full bg-neutral-900 p-[15px] hover:bg-brand-main lg:size-[70px] lg:p-[18px] xl:size-[82px]"
+          className="hover:bg-brand-main size-[60px] rounded-full bg-neutral-900 p-[15px] lg:size-[70px] lg:p-[18px] xl:size-[82px]"
           onClick={() => onReset()}
         >
           <FiRefreshCcw className="size-full justify-center text-slate-50" />
@@ -34,7 +34,7 @@ export default function TimerController({
       </div>
       <div className="flex size-full flex-1 items-center justify-center ">
         <button
-          className="size-[100px] rounded-full bg-neutral-900 p-[30px] hover:bg-brand-main lg:size-[130px] lg:p-[40px] xl:size-[152px] xl:p-[45px]"
+          className="hover:bg-brand-main size-[100px] rounded-full bg-neutral-900 p-[30px] lg:size-[130px] lg:p-[40px] xl:size-[152px] xl:p-[45px]"
           onClick={() => {
             if (isRunning) {
               onPause();

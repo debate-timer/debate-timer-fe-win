@@ -30,14 +30,14 @@ export default function EditDeleteButtons(props: EditDeleteButtonsProps) {
       <div className="flex justify-end gap-2">
         <button
           onClick={openEditModal}
-          className="rounded-sm bg-neutral-0 p-[2px]"
+          className="bg-neutral-0 rounded-sm p-[2px]"
           aria-label="수정하기"
         >
           <RiEditFill className="text-neutral-900" />
         </button>
         <button
           onClick={openDeleteModal}
-          className="rounded-sm bg-neutral-0 p-[2px]"
+          className="bg-neutral-0 rounded-sm p-[2px]"
           aria-label="삭제하기"
         >
           <RiDeleteBinFill className="text-neutral-900" />
