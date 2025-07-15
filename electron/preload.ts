@@ -17,6 +17,7 @@ declare global {
     db: DB_API;
   }
 }
+
 contextBridge.exposeInMainWorld('db', {
   get: (id: UUID) => ipcRenderer.invoke('db-get', id),
   getAll: () => ipcRenderer.invoke('db-get-all'),
