@@ -1,10 +1,12 @@
 import LoadingSpinner from '../LoadingSpinner';
 
 interface LoadingIndicatorProps {
-  message: string;
+  message?: string;
 }
 
-export default function LoadingIndicator({ message }: LoadingIndicatorProps) {
+export default function LoadingIndicator({
+  message = '데이터를 불러오고 있습니다...',
+}: LoadingIndicatorProps) {
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
       <LoadingSpinner size="size-32" color="text-neutral-500" />

@@ -2,7 +2,7 @@ import { MdErrorOutline } from 'react-icons/md';
 
 interface ErrorIndicatorProps {
   message: string;
-  onClickRetry: (() => void) | undefined;
+  onClickRetry?: () => void;
 }
 
 export default function ErrorIndicator({
