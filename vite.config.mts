@@ -41,16 +41,6 @@ const viteConfig = defineViteConfig(({ mode }) => {
         },
       ]),
     ],
-    server: {
-      proxy: {
-        '/api': {
-          target: env.VITE_API_BASE_URL,
-          rewrite: (path: string) => path.replace(/^\/api/, ''),
-          changeOrigin: true,
-          ws: true,
-        },
-      },
-    },
     base: './',
     build: {
       outDir: 'dist/renderer',
