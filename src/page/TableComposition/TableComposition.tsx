@@ -21,11 +21,6 @@ export default function TableComposition() {
   const mode = searchParams.get('mode') as Mode;
   const id = searchParams.get('tableId');
 
-  // Validate whether is is valid UUID
-  if (!isUUID(id)) {
-    throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
-  }
-
   // Print different funnel page by mode (edit a existing table or add a new table)
   const initialMode: TableCompositionStep =
     mode !== 'edit' ? 'NameAndType' : 'TimeBox';
@@ -34,7 +29,6 @@ export default function TableComposition() {
 
   // 테이블 데이터 패칭 분기
   const {
-    data,
     error,
     execute: getTable,
     isLoading,
@@ -54,6 +48,9 @@ export default function TableComposition() {
     updateInfo(patchedInfo);
 
     if (mode === 'edit') {
+      if (!isUUID(id)) {
+        throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+      }
       editTable(id);
     } else {
       addTable();
@@ -66,6 +63,9 @@ export default function TableComposition() {
     }
 
     const getData = async () => {
+      if (!isUUID(id)) {
+        throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+      }
       const response = await getTable(id);
 
       if (response.success) {
@@ -82,9 +82,16 @@ export default function TableComposition() {
     <DefaultLayout>
       {isLoading && <LoadingIndicator />}
       {!isLoading && error && (
-        <ErrorIndicator onClickRetry={() => getTable(id)} />
+        <ErrorIndicator
+          onClickRetry={() => {
+            if (!isUUID(id)) {
+              throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+            }
+            getTable(id);
+          }}
+        />
       )}
-      {!isLoading && !error && data && (
+      {!isLoading && !error && (
         <Funnel
           step={{
             NameAndType: (
