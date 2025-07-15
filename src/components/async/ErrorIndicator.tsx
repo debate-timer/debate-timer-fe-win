@@ -1,16 +1,16 @@
 import { MdErrorOutline } from 'react-icons/md';
 
 interface ErrorIndicatorProps {
-  message: string;
+  message?: string;
   onClickRetry?: () => void;
 }
 
 export default function ErrorIndicator({
-  message,
+  message = '데이터를 불러오지 못했어요. 다시 시도할까요?',
   onClickRetry = undefined,
 }: ErrorIndicatorProps) {
   return (
-    <div className="flex flex-col items-center justify-center space-y-4">
+    <div className="flex h-full w-full flex-col items-center justify-center space-y-4">
       <MdErrorOutline className="size-32 text-red-500" />
       <p className="text-xl">{message}</p>
 
