@@ -3,12 +3,14 @@ import TableNameAndType from './components/TableNameAndType/TableNameAndType';
 import useFunnel from '../../hooks/useFunnel';
 import useTableFrom from './hook/useTableFrom';
 import TimeBoxStep from './components/TimeBoxStep/TimeBoxStep';
-import { UUID } from 'crypto';
 import { useSearchParams } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../type/type';
+import { useEffect, useState } from 'react';
+import { DebateTableData } from '../../type/type';
 import repository from '../../repositories/IPCDebateTableRepository';
 import { isUUID } from '../../util/type_guard';
+import useAsyncRequest from '../../repositories/useAsyncRequest';
+import LoadingIndicator from '../../components/async/LoadingIndicator';
+import ErrorIndicator from '../../components/async/ErrorIndicator';
 
 export type TableCompositionStep = 'NameAndType' | 'TimeBox';
 type Mode = 'edit' | 'add';
@@ -31,19 +33,13 @@ export default function TableComposition() {
     useFunnel<TableCompositionStep>(initialMode);
 
   // 테이블 데이터 패칭 분기
-  const [data, setData] = useState<DebateTableData | null>(null);
-
-  const initData = useMemo(() => {
-    if (mode === 'edit' && data) {
-      const info = data.info as DebateInfo;
-
-      return {
-        info: info,
-        table: data.table as TimeBoxInfo[],
-      };
-    }
-    return undefined;
-  }, [mode, data]);
+  const {
+    data,
+    error,
+    execute: getTable,
+    isLoading,
+  } = useAsyncRequest(repository.getTable);
+  const [initData, setInitData] = useState<DebateTableData>();
 
   const { formData, updateInfo, updateTable, addTable, editTable } =
     useTableFrom(currentStep, initData);
@@ -65,39 +61,52 @@ export default function TableComposition() {
   };
 
   useEffect(() => {
-    const getData = async (tableId: UUID) => {
-      const data = await repository.getTable(tableId);
-      setData(data);
+    if (mode !== 'edit') {
+      return;
+    }
+
+    const getData = async () => {
+      const response = await getTable(id);
+
+      if (response.success) {
+        if (response.data) {
+          setInitData(response.data);
+        }
+      }
     };
 
-    if (mode === 'edit') {
-      getData(id);
-    }
-  }, []);
+    getData();
+  }, [getTable, id, mode]);
 
   return (
     <DefaultLayout>
-      <Funnel
-        step={{
-          NameAndType: (
-            <TableNameAndType
-              info={formData.info}
-              isEdit={mode === 'edit'}
-              onInfoChange={updateInfo}
-              onButtonClick={() => goToStep('TimeBox')}
-            />
-          ),
-          TimeBox: (
-            <TimeBoxStep
-              initData={formData}
-              isEdit={mode === 'edit'}
-              onTimeBoxChange={updateTable}
-              onFinishButtonClick={handleButtonClick}
-              onEditTableInfoButtonClick={() => goToStep('NameAndType')}
-            />
-          ),
-        }}
-      />
+      {isLoading && <LoadingIndicator />}
+      {!isLoading && error && (
+        <ErrorIndicator onClickRetry={() => getTable(id)} />
+      )}
+      {!isLoading && !error && data && (
+        <Funnel
+          step={{
+            NameAndType: (
+              <TableNameAndType
+                info={formData.info}
+                isEdit={mode === 'edit'}
+                onInfoChange={updateInfo}
+                onButtonClick={() => goToStep('TimeBox')}
+              />
+            ),
+            TimeBox: (
+              <TimeBoxStep
+                initData={formData}
+                isEdit={mode === 'edit'}
+                onTimeBoxChange={updateTable}
+                onFinishButtonClick={handleButtonClick}
+                onEditTableInfoButtonClick={() => goToStep('NameAndType')}
+              />
+            ),
+          }}
+        />
+      )}
     </DefaultLayout>
   );
 }

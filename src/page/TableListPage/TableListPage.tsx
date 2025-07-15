@@ -56,7 +56,10 @@ export default function TableListPage() {
       <DefaultLayout.ContentContainer>
         {getAllTablesLoading && <LoadingIndicator />}
         {!getAllTablesLoading && getAllTablesError && (
-          <ErrorIndicator onClickRetry={() => getAllTables()} />
+          <ErrorIndicator
+            onClickRetry={() => getAllTables()}
+            message={String(getAllTablesError)}
+          />
         )}
         {!getAllTablesLoading && !getAllTablesError && getAllTablesData && (
           <div className="flex max-w-[1140px] flex-wrap justify-start">

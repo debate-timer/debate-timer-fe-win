@@ -11,6 +11,8 @@ import TimerView from './components/TimerView';
 import { useTimerPageModal } from './hooks/useTimerPageModal';
 import { FirstUseToolTipModal } from './components/FirstUseToolTipModal';
 import { isUUID } from '../../util/type_guard';
+import LoadingIndicator from '../../components/async/LoadingIndicator';
+import ErrorIndicator from '../../components/async/ErrorIndicator';
 
 export default function TimerPage() {
   const { id } = useParams();
@@ -27,12 +29,17 @@ export default function TimerPage() {
   const state = useTimerPageState(tableId);
 
   useTimerHotkey(state);
-  const { warningBellRef, finishBellRef, data, bg, index, goToOtherItem } =
-    state;
-
-  if (!data) {
-    throw new Error('테이블 데이터가 올바르지 않아요.');
-  }
+  const {
+    warningBellRef,
+    finishBellRef,
+    data,
+    bg,
+    index,
+    goToOtherItem,
+    error,
+    isLoading,
+    patchedData,
+  } = state;
 
   return (
     <>
@@ -44,18 +51,18 @@ export default function TimerPage() {
           <DefaultLayout.Header.Left>
             <HeaderTableInfo
               name={
-                data === undefined || data.info.name.trim() === ''
+                data === undefined || data?.info.name.trim() === ''
                   ? '테이블 이름 없음'
-                  : data.info.name
+                  : data?.info.name
               }
             />
           </DefaultLayout.Header.Left>
           <DefaultLayout.Header.Center>
             <HeaderTitle
               title={
-                data === undefined || data.info.agenda.trim() === ''
+                data === undefined || data?.info.agenda.trim() === ''
                   ? '주제 없음'
-                  : data.info.agenda
+                  : data?.info.agenda
               }
             />
           </DefaultLayout.Header.Center>
@@ -69,20 +76,24 @@ export default function TimerPage() {
 
         {/* Containers */}
         <DefaultLayout.ContentContainer noPadding={true}>
-          <div
-            className={`flex h-full w-full flex-col items-center justify-center space-y-[25px] xl:space-y-[40px] ${bgColorMap[bg]}`}
-          >
-            {/* 타이머 두 개 + ENTER 버튼 */}
-            <TimerView state={state} />
-            {/* Round control buttons on the bottom side */}
-            {data && (
-              <RoundControlRow
-                data={data}
-                index={index}
-                goToOtherItem={goToOtherItem}
-              />
-            )}
-          </div>
+          {isLoading && <LoadingIndicator />}
+          {!isLoading && error && <ErrorIndicator />}
+          {!isLoading && !error && patchedData && (
+            <div
+              className={`flex h-full w-full flex-col items-center justify-center space-y-[25px] xl:space-y-[40px] ${bgColorMap[bg]}`}
+            >
+              {/* 타이머 두 개 + ENTER 버튼 */}
+              <TimerView state={state} />
+              {/* Round control buttons on the bottom side */}
+              {data && (
+                <RoundControlRow
+                  data={data}
+                  index={index}
+                  goToOtherItem={goToOtherItem}
+                />
+              )}
+            </div>
+          )}
         </DefaultLayout.ContentContainer>
       </DefaultLayout>
 
