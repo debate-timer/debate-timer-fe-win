@@ -8,13 +8,20 @@ import { bgColorMap, useTimerPageState } from './hooks/useTimerPageState';
 import { useTimerHotkey } from './hooks/useTimerHotkey';
 import RoundControlRow from './components/RoundControlRow';
 import TimerView from './components/TimerView';
-import { UUID } from 'crypto';
 import { useTimerPageModal } from './hooks/useTimerPageModal';
 import { FirstUseToolTipModal } from './components/FirstUseToolTipModal';
+import { isUUID } from '../../util/type_guard';
 
 export default function TimerPage() {
   const { id } = useParams();
-  const tableId = id as UUID;
+
+  // Validate whether is is valid UUID
+  if (!isUUID(id)) {
+    throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+  }
+
+  // Prepare another states with valid UUID
+  const tableId = id;
   const { openUseTooltipModal, UseToolTipWrapper, closeUseTooltipModal } =
     useTimerPageModal();
   const state = useTimerPageState(tableId);
@@ -24,7 +31,7 @@ export default function TimerPage() {
     state;
 
   if (!data) {
-    return null;
+    throw new Error('테이블 데이터가 올바르지 않아요.');
   }
 
   return (

@@ -5,29 +5,34 @@ import HeaderTableInfo from '../../components/HeaderTableInfo/HeaderTableInfo';
 import HeaderTitle from '../../components/HeaderTitle/HeaderTitle';
 import { RiEditFill, RiSpeakFill } from 'react-icons/ri';
 import DebatePanel from '../TableComposition/components/DebatePanel/DebatePanel';
-import { DebateTableData, StanceToString } from '../../type/type';
-import { useEffect, useState } from 'react';
+import { StanceToString } from '../../type/type';
+import { useEffect } from 'react';
 import repository from '../../repositories/IPCDebateTableRepository';
-import { UUID } from 'crypto';
+import useAsyncRequest from '../../repositories/useAsyncRequest';
+import { isUUID } from '../../util/type_guard';
+import LoadingIndicator from '../../components/async/LoadingIndicator';
+import ErrorIndicator from '../../components/async/ErrorIndicator';
 
 export default function TableOverview() {
   const { id } = useParams();
-  const tableId = id;
+
+  // Validate whether is is valid UUID
+  if (!isUUID(id)) {
+    throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+  }
+
   const navigate = useNavigate();
 
-  // Only uses hooks related with customize due to the removal of parliamentary
-  const [data, setData] = useState<DebateTableData | null>(null);
+  const {
+    data,
+    error,
+    isLoading,
+    execute: getTable,
+  } = useAsyncRequest(repository.getTable);
 
   useEffect(() => {
-    const getItem = async (id: UUID) => {
-      const item = await repository.getTable(id);
-      setData(item);
-    };
-
-    if (id) {
-      getItem(id as UUID);
-    }
-  }, []);
+    getTable(id);
+  }, [getTable, id]);
 
   return (
     <>
@@ -43,27 +48,37 @@ export default function TableOverview() {
         </DefaultLayout.Header>
 
         <DefaultLayout.ContentContainer>
-          <section className="mx-auto flex w-full max-w-4xl flex-col justify-center">
-            <PropsAndConsTitle
-              prosTeamName={
-                data !== null ? data.info.prosTeamName : StanceToString['PROS']
-              }
-              consTeamName={
-                data !== null ? data.info.consTeamName : StanceToString['CONS']
-              }
-            />
+          {isLoading && <LoadingIndicator />}
+          {!isLoading && error && (
+            <ErrorIndicator onClickRetry={() => getTable(id)} />
+          )}
+          {!isLoading && !error && data && (
+            <section className="mx-auto flex w-full max-w-4xl flex-col justify-center">
+              <PropsAndConsTitle
+                prosTeamName={
+                  data !== null
+                    ? data.info.prosTeamName
+                    : StanceToString['PROS']
+                }
+                consTeamName={
+                  data !== null
+                    ? data.info.consTeamName
+                    : StanceToString['CONS']
+                }
+              />
 
-            <div className="flex w-full flex-col gap-2">
-              {data?.table.map((info, index) => (
-                <DebatePanel
-                  key={index}
-                  info={info}
-                  prosTeamName={data.info.prosTeamName}
-                  consTeamName={data.info.consTeamName}
-                />
-              ))}
-            </div>
-          </section>
+              <div className="flex w-full flex-col gap-2">
+                {data?.table.map((info, index) => (
+                  <DebatePanel
+                    key={index}
+                    info={info}
+                    prosTeamName={data.info.prosTeamName}
+                    consTeamName={data.info.consTeamName}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </DefaultLayout.ContentContainer>
 
         <DefaultLayout.StickyFooterWrapper>
@@ -71,9 +86,7 @@ export default function TableOverview() {
             <button
               className="button enabled-hover-neutral h-16 w-full"
               onClick={() => {
-                navigate(
-                  `/composition?mode=edit&tableId=${tableId}&type=CUSTOMIZE`,
-                );
+                navigate(`/composition?mode=edit&tableId=${id}&type=CUSTOMIZE`);
               }}
             >
               <div className="flex items-center justify-center gap-2">
@@ -84,7 +97,7 @@ export default function TableOverview() {
             <button
               className="button enabled-hover-neutral h-16 w-full"
               onClick={() => {
-                navigate(`/table/customize/${tableId}`);
+                navigate(`/table/customize/${id}`);
               }}
             >
               <div className="flex items-center justify-center gap-2">

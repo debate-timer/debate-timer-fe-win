@@ -18,6 +18,7 @@ export default function TableListPage() {
     isLoading: getAllTablesLoading,
     execute: getAllTables,
   } = useAsyncRequest(repo.getAllTables);
+  const { execute: deleteTable } = useAsyncRequest(repo.deleteTable);
   const navigate = useNavigate();
 
   // TODO: have to delete the query param 'type'
@@ -29,8 +30,13 @@ export default function TableListPage() {
     navigate(`/overview/customize/${tableId}`);
   };
   const onDelete = async (tableId: UUID) => {
-    await repo.deleteTable(tableId);
-    getAllTables(); // Ensure refreshing after deleting item
+    const result = await deleteTable(tableId);
+
+    if (!result.success) {
+      alert('테이블을 삭제하지 못했습니다. 다시 시도해주세요.');
+    } else {
+      getAllTables();
+    }
   };
 
   useEffect(() => {
@@ -50,13 +56,9 @@ export default function TableListPage() {
       <DefaultLayout.ContentContainer>
         {getAllTablesLoading && <LoadingIndicator />}
         {!getAllTablesLoading && getAllTablesError && (
-          <ErrorIndicator
-            message="데이터를 불러오지 못했어요. 다시 시도할까요?"
-            onClickRetry={() => getAllTables()}
-          />
+          <ErrorIndicator onClickRetry={() => getAllTables()} />
         )}
-
-        {!getAllTablesLoading && !getAllTablesError && (
+        {!getAllTablesLoading && !getAllTablesError && getAllTablesData && (
           <div className="flex max-w-[1140px] flex-wrap justify-start">
             {/** Button that adds new table */}
             <button

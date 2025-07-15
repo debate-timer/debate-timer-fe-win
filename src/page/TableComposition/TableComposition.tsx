@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../type/type';
 import repository from '../../repositories/IPCDebateTableRepository';
+import { isUUID } from '../../util/type_guard';
 
 export type TableCompositionStep = 'NameAndType' | 'TimeBox';
 type Mode = 'edit' | 'add';
@@ -16,7 +17,12 @@ export default function TableComposition() {
   // URL 등으로부터 "editMode"와 "tableId"를 추출
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as Mode;
-  const tableId = (searchParams.get('tableId') || '1-1-1-1-1') as UUID;
+  const id = searchParams.get('tableId');
+
+  // Validate whether is is valid UUID
+  if (!isUUID(id)) {
+    throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+  }
 
   // Print different funnel page by mode (edit a existing table or add a new table)
   const initialMode: TableCompositionStep =
@@ -59,7 +65,7 @@ export default function TableComposition() {
     updateInfo(patchedInfo);
 
     if (mode === 'edit') {
-      EditTable(tableId);
+      EditTable(id);
     } else {
       AddTable();
     }
@@ -72,7 +78,7 @@ export default function TableComposition() {
     };
 
     if (mode === 'edit') {
-      getData(tableId);
+      getData(id);
     }
   }, []);
 
