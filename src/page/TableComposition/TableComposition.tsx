@@ -3,10 +3,11 @@ import TableNameAndType from './components/TableNameAndType/TableNameAndType';
 import useFunnel from '../../hooks/useFunnel';
 import useTableFrom from './hook/useTableFrom';
 import TimeBoxStep from './components/TimeBoxStep/TimeBoxStep';
-import { useGetDebateTableData } from '../../hooks/query/useGetDebateTableData';
+import { UUID } from 'crypto';
 import { useSearchParams } from 'react-router-dom';
-import { useMemo } from 'react';
-import { DebateInfo, TimeBoxInfo } from '../../type/type';
+import { useEffect, useMemo, useState } from 'react';
+import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../type/type';
+import repository from '../../repositories/IPCDebateTableRepository';
 
 export type TableCompositionStep = 'NameAndType' | 'TimeBox';
 type Mode = 'edit' | 'add';
@@ -15,7 +16,7 @@ export default function TableComposition() {
   // URL 등으로부터 "editMode"와 "tableId"를 추출
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as Mode;
-  const tableId = Number(searchParams.get('tableId') || 0);
+  const tableId = (searchParams.get('tableId') || '1-1-1-1-1') as UUID;
 
   // Print different funnel page by mode (edit a existing table or add a new table)
   const initialMode: TableCompositionStep =
@@ -23,9 +24,8 @@ export default function TableComposition() {
   const { Funnel, currentStep, goToStep } =
     useFunnel<TableCompositionStep>(initialMode);
 
-  // edit 모드일 때만 서버에서 initData를 가져옴
   // 테이블 데이터 패칭 분기
-  const { data } = useGetDebateTableData(tableId, mode === 'edit');
+  const [data, setData] = useState<DebateTableData | null>(null);
 
   const initData = useMemo(() => {
     if (mode === 'edit' && data) {
@@ -39,7 +39,7 @@ export default function TableComposition() {
     return undefined;
   }, [mode, data]);
 
-  const { formData, updateInfo, updateTable, AddTable, EditTable } =
+  const { formData, updateInfo, updateTable, addTable, editTable } =
     useTableFrom(currentStep, initData);
 
   const handleButtonClick = () => {
@@ -52,11 +52,22 @@ export default function TableComposition() {
     updateInfo(patchedInfo);
 
     if (mode === 'edit') {
-      EditTable(tableId);
+      editTable(tableId);
     } else {
-      AddTable();
+      addTable();
     }
   };
+
+  useEffect(() => {
+    const getData = async (tableId: UUID) => {
+      const data = await repository.getTable(tableId);
+      setData(data);
+    };
+
+    if (mode === 'edit') {
+      getData(tableId);
+    }
+  }, []);
 
   return (
     <DefaultLayout>

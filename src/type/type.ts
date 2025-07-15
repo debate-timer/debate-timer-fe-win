@@ -2,6 +2,7 @@ import { UUID } from 'crypto';
 
 // Types
 export type Stance = 'PROS' | 'CONS' | 'NEUTRAL';
+export type TimeBasedStance = Exclude<Stance, 'NEUTRAL'>;
 export type TimeBoxType = 'NORMAL' | 'TIME_BASED';
 
 // Type converters
@@ -33,7 +34,7 @@ export interface TimeBoxInfo {
 }
 
 export interface DebateTable {
-  id: number;
+  id: UUID;
   name: string;
   agenda: string;
 }

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { DebateTable } from '../../../type/type';
-import { IoArrowForward, IoShareOutline } from 'react-icons/io5';
+import { IoArrowForward } from 'react-icons/io5';
 import { RiDeleteBinFill, RiEditFill } from 'react-icons/ri';
 import { useModal } from '../../../hooks/useModal';
 import DialogModal from '../../../components/DialogModal/DialogModal';
-import { useTableShare } from '../../../hooks/useTableShare';
 
 interface TableProps extends DebateTable {
   onEdit: () => void;
@@ -13,7 +12,6 @@ interface TableProps extends DebateTable {
 }
 
 export default function Table({
-  id,
   name,
   agenda,
   onDelete,
@@ -21,7 +19,6 @@ export default function Table({
   onClick,
 }: TableProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { openShareModal, TableShareModal } = useTableShare(id);
   const { openModal, closeModal, ModalWrapper } = useModal({
     isCloseButtonExist: false,
   });
@@ -33,7 +30,7 @@ export default function Table({
 
   return (
     <>
-      <button
+      <div
         className={`m-5 flex h-[220px] w-[340px] items-center overflow-hidden rounded-[28px] ${bgColor} shadow-lg transition-all duration-300 hover:scale-105`}
         onClick={() => onClick()}
         onMouseEnter={() => setIsHovered(true)}
@@ -54,7 +51,7 @@ export default function Table({
                 e.stopPropagation();
                 onEdit();
               }}
-              className="rounded-sm bg-neutral-0 p-[2px]"
+              className="bg-neutral-0 rounded-sm p-[2px]"
               aria-label="수정하기"
             >
               <RiEditFill className="text-neutral-900" />
@@ -64,25 +61,15 @@ export default function Table({
                 e.stopPropagation();
                 openModal();
               }}
-              className="rounded-sm bg-neutral-0 p-[2px]"
+              className="bg-neutral-0 rounded-sm p-[2px]"
               aria-label="삭제하기"
             >
               <RiDeleteBinFill className="text-neutral-900" />
             </button>
-            <button
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                openShareModal();
-              }}
-              className="rounded-sm bg-neutral-0 p-[2px]"
-              aria-label="공유하기"
-            >
-              <IoShareOutline className="text-neutral-900" />
-            </button>
           </div>
 
-          <div className="flex size-[40px] items-center justify-center rounded-full bg-neutral-1000">
-            <IoArrowForward className="size-[24px] text-neutral-0" />
+          <div className="bg-neutral-1000 flex size-[40px] items-center justify-center rounded-full">
+            <IoArrowForward className="text-neutral-0 size-[24px]" />
           </div>
         </div>
 
@@ -101,10 +88,10 @@ export default function Table({
           <p
             className={`text-[16px] duration-300 ${textBodyColor} w-full truncate text-start`}
           >
-            주제 | {agenda}
+            주제 | {agenda.length > 0 ? agenda : '주제 없음'}
           </p>
         </div>
-      </button>
+      </div>
 
       <ModalWrapper>
         <DialogModal
@@ -124,8 +111,6 @@ export default function Table({
           </div>
         </DialogModal>
       </ModalWrapper>
-
-      <TableShareModal />
     </>
   );
 }

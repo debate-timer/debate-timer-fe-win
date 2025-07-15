@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { GlobalPortal } from '../../util/GlobalPortal';
 import TableComposition from './TableComposition';
@@ -16,24 +15,18 @@ function TestWrapper({
   children: React.ReactNode;
   initialEntries?: string[];
 }) {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <GlobalPortal.Provider>
-        <MemoryRouter initialEntries={initialEntries}>
-          <Routes>
-            {/* TableComposition 테스트 경로 */}
-            <Route path="/composition" element={children} />
-
-            {/* 실제로 이동하고 싶은 /overview 경로 - 테스트용 컴포넌트 */}
-            <Route
-              path="/overview/customize/1"
-              element={<h1 data-testid="overview-page">Overview Page</h1>}
-            />
-          </Routes>
-        </MemoryRouter>
-      </GlobalPortal.Provider>
-    </QueryClientProvider>
+    <GlobalPortal.Provider>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route path="/composition" element={children} />
+          <Route
+            path="/overview/customize/:tableId"
+            element={<h1 data-testid="overview-page">Overview Page</h1>}
+          />
+        </Routes>
+      </MemoryRouter>
+    </GlobalPortal.Provider>
   );
 }
 
@@ -66,12 +59,15 @@ describe('TableComposition', () => {
       </TestWrapper>,
     );
 
-    // Check header title is exist to verify whether TablenameAndType is correctly rendered
-    expect(screen.findByRole('heading', { name: '토론 정보를 설정해주세요' }));
+    expect(
+      await screen.findByRole('heading', { name: '토론 정보를 설정해주세요' }),
+    ).toBeInTheDocument();
 
-    // Go to next step - TimeBoxStep
+    // Go to next step
     await userEvent.click(await screen.findByRole('button', { name: '다음' }));
-    expect(screen.findByRole('heading', { name: '주제 없음' }));
+    expect(
+      await screen.findByRole('heading', { name: '주제 없음' }),
+    ).toBeInTheDocument();
 
     // Check whether finish button is disabled
     const finishButton = await screen.findByRole('button', {
@@ -84,11 +80,11 @@ describe('TableComposition', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: '설정 완료' }),
     );
-    expect(screen.getByTestId('timebox')).toBeInTheDocument();
+    expect(await screen.findByTestId('timebox')).toBeInTheDocument();
 
     // Finish creation flow
     await userEvent.click(finishButton);
-    expect(screen.getByTestId('overview-page')).toBeInTheDocument();
+    expect(await screen.findByTestId('overview-page')).toBeInTheDocument();
   });
 
   it('Modification flow test', async () => {

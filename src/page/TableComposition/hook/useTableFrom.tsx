@@ -3,9 +3,8 @@ import { useNavigate, useNavigationType } from 'react-router-dom';
 import { TableCompositionStep } from '../TableComposition';
 import useBrowserStorage from '../../../hooks/useBrowserStorage';
 import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../../type/type';
-import useAddDebateTable from '../../../hooks/mutations/useAddDebateTable';
-import { usePutDebateTable } from '../../../hooks/mutations/usePutDebateTable';
-import { isGuestFlow } from '../../../util/sessionStorage';
+import { UUID } from 'crypto';
+import repository from '../../../repositories/IPCDebateTableRepository';
 
 const useTableFrom = (
   currentStep: TableCompositionStep,
@@ -82,31 +81,28 @@ const useTableFrom = (
     });
   };
 
-  const { mutate: onAddTable } = useAddDebateTable((tableId) => {
+  const onAddTable = async (item: DebateTableData) => {
+    const addedItem = await repository.postTable(item);
     removeValue();
-    navigate(`/overview/customize/${tableId}`);
-  });
+    navigate(`/overview/customize/${addedItem.info.id}`);
+  };
 
-  const { mutate: onModifyTable } = usePutDebateTable((tableId) => {
+  const onModifyTable = async (item: DebateTableData) => {
+    const modifiedItem = await repository.patchTable(item);
     removeValue();
-    if (isGuestFlow()) {
-      navigate(`/overview/customize/guest`);
-    } else {
-      navigate(`/overview/customize/${tableId}`);
-    }
-  });
+    navigate(`/overview/customize/${modifiedItem.info.id}`);
+  };
 
-  const AddTable = () => {
+  const addTable = () => {
     onAddTable({
       info: formData.info,
       table: formData.table as TimeBoxInfo[],
     });
   };
 
-  const EditTable = (tableId: number) => {
+  const editTable = (tableId: UUID) => {
     onModifyTable({
-      tableId,
-      info: formData.info,
+      info: { ...formData.info, id: tableId },
       table: formData.table as TimeBoxInfo[],
     });
   };
@@ -115,8 +111,8 @@ const useTableFrom = (
     formData,
     updateInfo,
     updateTable,
-    AddTable,
-    EditTable,
+    addTable,
+    editTable,
   };
 };
 

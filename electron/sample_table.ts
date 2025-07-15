@@ -1,87 +1,10 @@
-import { DebateTableData } from '../type/type';
-
-export const SAMPLE_TABLE_DATA: DebateTableData = {
-  info: {
-    id: '1-1-1-1-1',
-    agenda: '나의 토론 주제',
-    name: '나의 시간표',
-    prosTeamName: '찬성',
-    consTeamName: '반대',
-    finishBell: true,
-    warningBell: false,
-  },
-  table: [
-    {
-      boxType: 'NORMAL',
-      stance: 'PROS',
-      speechType: '입론',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '1번',
-    },
-    {
-      boxType: 'NORMAL',
-      stance: 'CONS',
-      speechType: '입론',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '1번',
-    },
-    {
-      boxType: 'NORMAL',
-      stance: 'PROS',
-      speechType: '반론',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '2번',
-    },
-    {
-      boxType: 'NORMAL',
-      stance: 'CONS',
-      speechType: '반론',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '2번',
-    },
-    {
-      boxType: 'TIME_BASED',
-      stance: 'NEUTRAL',
-      speechType: '자유토론',
-      time: null,
-      timePerSpeaking: 120,
-      timePerTeam: 420,
-      speaker: '2번',
-    },
-    {
-      boxType: 'NORMAL',
-      stance: 'PROS',
-      speechType: '최종 발언',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '3번',
-    },
-    {
-      boxType: 'NORMAL',
-      stance: 'CONS',
-      speechType: '최종 발언',
-      time: 180,
-      timePerSpeaking: null,
-      timePerTeam: null,
-      speaker: '3번',
-    },
-  ],
-} as const;
+import { DebateTableData } from './type';
 
 export const OPEN_DEBATE_MAIN_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
-    agenda: '국민연금의 의무 가입을 폐지하여야 한다',
-    name: '대한민국 열린토론대회 예선 · 본선',
+    agenda: '국민연금 의무 가입을 폐지하여야 한다',
+    name: '열린토론대회 예선 · 본선',
     prosTeamName: '찬성',
     consTeamName: '반대',
     finishBell: true,
@@ -148,8 +71,8 @@ export const OPEN_DEBATE_MAIN_ROUND: DebateTableData = {
 export const OPEN_DEBATE_FINAL_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
-    agenda: '국민연금의 의무 가입을 폐지하여야 한다',
-    name: '대한민국 열린토론대회 결선',
+    agenda: '국민연금 의무 가입을 폐지하여야 한다',
+    name: '열린토론대회 결선',
     prosTeamName: '찬성',
     consTeamName: '반대',
     finishBell: true,

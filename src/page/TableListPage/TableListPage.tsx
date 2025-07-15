@@ -1,26 +1,37 @@
 import { useNavigate } from 'react-router-dom';
-import { useDeleteDebateTable } from '../../hooks/mutations/useDeleteDebateTable';
-import { useGetDebateTableList } from '../../hooks/query/useGetDebateTableList';
 import DefaultLayout from '../../layout/defaultLayout/DefaultLayout';
-import { DebateTable } from '../../type/type';
+import { DebateTableData } from '../../type/type';
 import Table from './components/Table';
 import HeaderTitle from '../../components/HeaderTitle/HeaderTitle';
+import repository from '../../repositories/IPCDebateTableRepository';
+import { UUID } from 'crypto';
+import { useEffect, useState } from 'react';
 
 export default function TableListPage() {
-  const { data } = useGetDebateTableList();
-  const { mutate: deleteCustomizeTable } = useDeleteDebateTable();
+  const repo = repository;
+  const [data, setData] = useState<DebateTableData[]>([]);
   const navigate = useNavigate();
+
+  const getAllTables = async () => {
+    const response = await repository.getAllTables();
+    setData(response);
+  };
   // TODO: have to delete the query param 'type'
-  const onEdit = (tableId: number) => {
+  const onEdit = (tableId: UUID) => {
     navigate(`/composition?mode=edit&tableId=${tableId}&type=CUSTOMIZE`);
   };
   // TODO: have to delete the string 'customize' from the URL
-  const onClick = (tableId: number) => {
+  const onClick = (tableId: UUID) => {
     navigate(`/overview/customize/${tableId}`);
   };
-  const onDelete = (tableId: number) => {
-    deleteCustomizeTable({ tableId });
+  const onDelete = async (tableId: UUID) => {
+    await repo.deleteTable(tableId);
+    getAllTables(); // Ensure refreshing after deleting item
   };
+
+  useEffect(() => {
+    getAllTables();
+  }, []);
 
   return (
     <DefaultLayout>
@@ -44,15 +55,15 @@ export default function TableListPage() {
 
           {/** All tables */}
           {data &&
-            data.tables.map((table: DebateTable, idx: number) => (
+            data.map((table: DebateTableData, idx: number) => (
               <Table
                 key={idx}
-                id={table.id}
-                name={table.name}
-                agenda={table.agenda}
-                onDelete={() => onDelete(table.id)}
-                onEdit={() => onEdit(table.id)}
-                onClick={() => onClick(table.id)}
+                id={table.info.id}
+                name={table.info.name}
+                agenda={table.info.agenda}
+                onDelete={() => onDelete(table.info.id)}
+                onEdit={() => onEdit(table.info.id)}
+                onClick={() => onClick(table.info.id)}
               />
             ))}
         </div>

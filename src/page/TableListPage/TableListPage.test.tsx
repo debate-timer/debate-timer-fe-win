@@ -1,19 +1,16 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GlobalPortal } from '../../util/GlobalPortal';
-import { MemoryRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { describe, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import TableListPage from './TableListPage';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <GlobalPortal.Provider>
-        <MemoryRouter>{children}</MemoryRouter>
-      </GlobalPortal.Provider>
-    </QueryClientProvider>
+    <GlobalPortal.Provider>
+      <HashRouter>{children}</HashRouter>
+    </GlobalPortal.Provider>
   );
 }
 

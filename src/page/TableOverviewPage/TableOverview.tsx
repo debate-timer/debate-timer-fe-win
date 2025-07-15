@@ -4,27 +4,30 @@ import { useNavigate, useParams } from 'react-router-dom';
 import HeaderTableInfo from '../../components/HeaderTableInfo/HeaderTableInfo';
 import HeaderTitle from '../../components/HeaderTitle/HeaderTitle';
 import { RiEditFill, RiSpeakFill } from 'react-icons/ri';
-import usePatchDebateTable from '../../hooks/mutations/usePatchDebateTable';
-import { useGetDebateTableData } from '../../hooks/query/useGetDebateTableData';
 import DebatePanel from '../TableComposition/components/DebatePanel/DebatePanel';
-import { useTableShare } from '../../hooks/useTableShare';
-import { MdOutlineIosShare } from 'react-icons/md';
-import { StanceToString } from '../../type/type';
-import { isGuestFlow } from '../../util/sessionStorage';
+import { DebateTableData, StanceToString } from '../../type/type';
+import { useEffect, useState } from 'react';
+import repository from '../../repositories/IPCDebateTableRepository';
+import { UUID } from 'crypto';
 
 export default function TableOverview() {
   const { id } = useParams();
-  const tableId = Number(id);
+  const tableId = id;
   const navigate = useNavigate();
 
   // Only uses hooks related with customize due to the removal of parliamentary
-  const { data } = useGetDebateTableData(tableId);
-  const onModifyCustomizeTableData = usePatchDebateTable((tableId) => {
-    navigate(`/table/customize/${tableId}`);
-  });
+  const [data, setData] = useState<DebateTableData | null>(null);
 
-  // Hook for sharing tables
-  const { openShareModal, TableShareModal } = useTableShare(tableId);
+  useEffect(() => {
+    const getItem = async (id: UUID) => {
+      const item = await repository.getTable(id);
+      setData(item);
+    };
+
+    if (id) {
+      getItem(id as UUID);
+    }
+  }, []);
 
   return (
     <>
@@ -43,14 +46,10 @@ export default function TableOverview() {
           <section className="mx-auto flex w-full max-w-4xl flex-col justify-center">
             <PropsAndConsTitle
               prosTeamName={
-                data !== undefined
-                  ? data.info.prosTeamName
-                  : StanceToString['PROS']
+                data !== null ? data.info.prosTeamName : StanceToString['PROS']
               }
               consTeamName={
-                data !== undefined
-                  ? data.info.consTeamName
-                  : StanceToString['CONS']
+                data !== null ? data.info.consTeamName : StanceToString['CONS']
               }
             />
 
@@ -72,13 +71,9 @@ export default function TableOverview() {
             <button
               className="button enabled-hover-neutral h-16 w-full"
               onClick={() => {
-                if (isGuestFlow()) {
-                  navigate(`/composition?mode=edit&type=CUSTOMIZE`);
-                } else {
-                  navigate(
-                    `/composition?mode=edit&tableId=${tableId}&type=CUSTOMIZE`,
-                  );
-                }
+                navigate(
+                  `/composition?mode=edit&tableId=${tableId}&type=CUSTOMIZE`,
+                );
               }}
             >
               <div className="flex items-center justify-center gap-2">
@@ -86,37 +81,20 @@ export default function TableOverview() {
                 수정하기
               </div>
             </button>
-            <div className="flex h-16 w-full space-x-2">
-              <button
-                className="button enabled flex-1"
-                onClick={() => {
-                  if (isGuestFlow()) {
-                    navigate('/table/customize/guest');
-                  } else {
-                    onModifyCustomizeTableData.mutate({ tableId });
-                  }
-                }}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <RiSpeakFill />
-                  토론하기
-                </div>
-              </button>
-
-              <button
-                className="button enabled-hover-neutral flex size-16 items-center justify-center"
-                onClick={() => {
-                  openShareModal();
-                }}
-              >
-                <MdOutlineIosShare className="m-4 size-full" />
-              </button>
-            </div>
+            <button
+              className="button enabled-hover-neutral h-16 w-full"
+              onClick={() => {
+                navigate(`/table/customize/${tableId}`);
+              }}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <RiSpeakFill />
+                토론하기
+              </div>
+            </button>
           </div>
         </DefaultLayout.StickyFooterWrapper>
       </DefaultLayout>
-
-      <TableShareModal />
     </>
   );
 }
