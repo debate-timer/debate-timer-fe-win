@@ -24,9 +24,7 @@ export default function TableComposition() {
   const { Funnel, currentStep, goToStep } =
     useFunnel<TableCompositionStep>(initialMode);
 
-  // edit 모드일 때만 서버에서 initData를 가져옴
   // 테이블 데이터 패칭 분기
-  // const { data } = useGetDebateTableData(tableId, mode === 'edit');
   const [data, setData] = useState<DebateTableData | null>(null);
 
   const initData = useMemo(() => {
@@ -41,13 +39,8 @@ export default function TableComposition() {
     return undefined;
   }, [mode, data]);
 
-  const {
-    formData,
-    updateInfo,
-    updateTable,
-    addTable: AddTable,
-    editTable: EditTable,
-  } = useTableFrom(currentStep, initData);
+  const { formData, updateInfo, updateTable, addTable, editTable } =
+    useTableFrom(currentStep, initData);
 
   const handleButtonClick = () => {
     const patchedInfo = {
@@ -59,9 +52,9 @@ export default function TableComposition() {
     updateInfo(patchedInfo);
 
     if (mode === 'edit') {
-      EditTable(tableId);
+      editTable(tableId);
     } else {
-      AddTable();
+      addTable();
     }
   };
 

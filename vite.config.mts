@@ -1,11 +1,9 @@
-import { defineConfig as defineViteConfig, loadEnv, mergeConfig } from 'vite';
+import { defineConfig as defineViteConfig, mergeConfig } from 'vite';
 import { defineConfig as defineVitestConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import electron from 'vite-plugin-electron';
 
-const viteConfig = defineViteConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-
+const viteConfig = defineViteConfig(() => {
   return {
     plugins: [
       react(),

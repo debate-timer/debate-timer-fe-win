@@ -10,14 +10,14 @@ export default function PropsAndConsTitle({
   return (
     <div className="mx-auto flex w-full items-center justify-between gap-2 py-4">
       <div className="flex w-1/2 flex-col items-center">
-        <span className="text-2xl font-bold text-camp-blue">
+        <span className="text-camp-blue text-2xl font-bold">
           {prosTeamName}
         </span>
-        <div className="mt-1 h-1 w-full bg-camp-blue" />
+        <div className="bg-camp-blue mt-1 h-1 w-full" />
       </div>
       <div className="flex w-1/2 flex-col items-center">
-        <span className="text-2xl font-bold text-camp-red">{consTeamName}</span>
-        <div className="mt-1 h-1 w-full bg-camp-red" />
+        <span className="text-camp-red text-2xl font-bold">{consTeamName}</span>
+        <div className="bg-camp-red mt-1 h-1 w-full" />
       </div>
     </div>
   );

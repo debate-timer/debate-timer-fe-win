@@ -51,7 +51,7 @@ export default function Table({
                 e.stopPropagation();
                 onEdit();
               }}
-              className="rounded-sm bg-neutral-0 p-[2px]"
+              className="bg-neutral-0 rounded-sm p-[2px]"
               aria-label="수정하기"
             >
               <RiEditFill className="text-neutral-900" />
@@ -61,15 +61,15 @@ export default function Table({
                 e.stopPropagation();
                 openModal();
               }}
-              className="rounded-sm bg-neutral-0 p-[2px]"
+              className="bg-neutral-0 rounded-sm p-[2px]"
               aria-label="삭제하기"
             >
               <RiDeleteBinFill className="text-neutral-900" />
             </button>
           </div>
 
-          <div className="flex size-[40px] items-center justify-center rounded-full bg-neutral-1000">
-            <IoArrowForward className="size-[24px] text-neutral-0" />
+          <div className="bg-neutral-1000 flex size-[40px] items-center justify-center rounded-full">
+            <IoArrowForward className="text-neutral-0 size-[24px]" />
           </div>
         </div>
 
