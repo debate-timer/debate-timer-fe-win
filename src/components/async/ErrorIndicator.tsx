@@ -15,7 +15,10 @@ export default function ErrorIndicator({
       <p className="text-xl">{message}</p>
 
       {onClickRetry && (
-        <button onClick={() => onClickRetry()} className="button-enabled">
+        <button
+          onClick={() => onClickRetry()}
+          className="small-button enabled px-8 py-1"
+        >
           다시 시도하기
         </button>
       )}
