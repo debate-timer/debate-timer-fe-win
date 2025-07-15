@@ -16,6 +16,7 @@ export interface TimeBoxInfo {
 
 export interface DebateInfo {
   id: UUID;
+  datetime: string;
   name: string;
   agenda: string;
   prosTeamName: string;

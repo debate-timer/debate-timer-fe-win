@@ -29,6 +29,7 @@ const useTableFrom = (
       initialState: {
         info: {
           id: '1-1-1-1-1',
+          datetime: '2010-01-01 00:00:00',
           name: '',
           agenda: '',
           prosTeamName: '',
@@ -62,6 +63,7 @@ const useTableFrom = (
       const newInfo = typeof action === 'function' ? action(prev.info) : action;
       const debateInfo: DebateInfo = {
         id: newInfo.id,
+        datetime: newInfo.datetime,
         name: newInfo.name,
         agenda: newInfo.agenda,
         warningBell: newInfo.warningBell,

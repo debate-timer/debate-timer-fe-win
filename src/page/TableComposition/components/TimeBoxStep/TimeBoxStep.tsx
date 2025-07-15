@@ -51,7 +51,7 @@ export default function TimeBoxStep(props: TimeBoxStepProps) {
     );
   };
 
-  const isAbledSummitButton = initTimeBox.length !== 0 && !isLoading;
+  const isSubmitButtonEnabled = initTimeBox.length !== 0 && !isLoading;
 
   const renderTimeBoxItem = (info: TimeBoxInfo, index: number) => {
     return (
@@ -111,9 +111,9 @@ export default function TimeBoxStep(props: TimeBoxStepProps) {
           <button
             onClick={onFinishButtonClick}
             className={`h-16 w-full ${
-              isAbledSummitButton ? 'button enabled' : 'button disabled'
+              isSubmitButtonEnabled ? 'button enabled' : 'button disabled'
             }`}
-            disabled={!isAbledSummitButton}
+            disabled={!isSubmitButtonEnabled}
           >
             {isEdit ? '수정 완료' : '추가하기'}
           </button>

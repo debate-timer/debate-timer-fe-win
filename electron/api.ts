@@ -2,6 +2,8 @@ import { randomUUID, UUID } from 'crypto';
 import { DebateTableData } from './type';
 import fs from 'fs/promises';
 import { Mutex } from 'async-mutex';
+import { DateTime } from 'luxon';
+import { DATETIME_FORMAT } from './constants';
 
 // Mutex to prevent possible concurrency problem
 const dbMutex = new Mutex();
@@ -33,7 +35,14 @@ export async function getItem(
 // GET all items
 export async function getAllItems(dbPath: string): Promise<DebateTableData[]> {
   return await dbMutex.runExclusive(async () => {
-    return readDb(dbPath);
+    const db = await readDb(dbPath);
+    const sortedDb = db.sort((a, b) => {
+      const aDt = DateTime.fromFormat(a.info.datetime, DATETIME_FORMAT);
+      const bDt = DateTime.fromFormat(b.info.datetime, DATETIME_FORMAT);
+
+      return aDt.toMillis() - bDt.toMillis();
+    });
+    return sortedDb;
   });
 }
 
@@ -44,7 +53,9 @@ export async function postItem(
 ): Promise<DebateTableData> {
   return await dbMutex.runExclusive(async () => {
     const db = await readDb(dbPath);
+    const now = DateTime.local();
     item.info.id = randomUUID();
+    item.info.datetime = now.toFormat(DATETIME_FORMAT);
     db.push(item);
     await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
     return item;

@@ -31,7 +31,6 @@ export default function useAsyncRequest<T, Args extends unknown[]>(
 
       try {
         // On success
-        await new Promise((res) => setTimeout(res, 2000));
         const response = await Promise.race([requestPromise, abortPromise]);
 
         // Return data when no error is raised (=== data is successfully received)

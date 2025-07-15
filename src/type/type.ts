@@ -41,6 +41,7 @@ export interface DebateTable {
 
 export interface DebateInfo {
   id: UUID;
+  datetime: string;
   name: string;
   agenda: string;
   prosTeamName: string;

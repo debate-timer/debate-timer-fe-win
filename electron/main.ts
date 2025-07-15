@@ -4,10 +4,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { DebateTableData } from './type';
 import { getItem, getAllItems, deleteItem, patchItem, postItem } from './api';
-import {
-  OPEN_DEBATE_FINAL_ROUND,
-  OPEN_DEBATE_MAIN_ROUND,
-} from './sample_table';
+import { OPEN_DEBATE_FINAL_ROUND, OPEN_DEBATE_MAIN_ROUND } from './constants';
 
 // URL of Vite develop server (automatically set by vite-plugin-electron)
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
