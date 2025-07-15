@@ -25,7 +25,7 @@ export default function useAsyncRequest<T, Args extends unknown[]>(
 
       try {
         // On success
-        const response = await request(...args, { signal: controller.signal });
+        const response = await request(...args, controller.signal);
 
         // Return data
         setData(response);

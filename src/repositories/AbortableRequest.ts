@@ -1,3 +1,3 @@
 export type AbortableRequest<T, Args extends unknown[]> = (
-  ...args: [...Args, { signal: AbortSignal }]
+  ...args: [...Args, AbortSignal]
 ) => Promise<T>;
