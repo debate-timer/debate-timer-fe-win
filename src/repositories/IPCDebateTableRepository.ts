@@ -4,37 +4,28 @@ import { UUID } from 'crypto';
 // Interface for IPC-based repository
 class IPCDebateTableRepository {
   // Get 1 item
-  async getTable(id: UUID, signal?: AbortSignal): Promise<DebateTableData> {
-    return await window.db.get(id, signal);
+  async getTable(id: UUID): Promise<DebateTableData> {
+    return await window.db.get(id);
   }
 
   // Get all items
-  async getAllTables(signal?: AbortSignal): Promise<DebateTableData[]> {
-    return await window.db.getAll(signal);
+  async getAllTables(): Promise<DebateTableData[]> {
+    return await window.db.getAll();
   }
 
   // Create a new item
-  async postTable(
-    item: DebateTableData,
-    signal?: AbortSignal,
-  ): Promise<DebateTableData> {
-    return await window.db.post(item, signal);
+  async postTable(item: DebateTableData): Promise<DebateTableData> {
+    return await window.db.post(item);
   }
 
   // Delete the item
-  async deleteTable(
-    id: UUID,
-    signal?: AbortSignal,
-  ): Promise<DebateTableData[]> {
-    return await window.db.delete(id, signal);
+  async deleteTable(id: UUID): Promise<DebateTableData[]> {
+    return await window.db.delete(id);
   }
 
   // Modify the existing item
-  async patchTable(
-    item: DebateTableData,
-    signal?: AbortSignal,
-  ): Promise<DebateTableData> {
-    return await window.db.patch(item, signal);
+  async patchTable(item: DebateTableData): Promise<DebateTableData> {
+    return await window.db.patch(item);
   }
 }
 

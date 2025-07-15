@@ -1,9 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Result } from './Result';
-import { AbortableRequest } from './AbortableRequest';
 
 export default function useAsyncRequest<T, Args extends unknown[]>(
-  request: AbortableRequest<T, Args>,
+  request: (...args: Args) => Promise<T>,
   timeout: number = 5000,
 ) {
   // Declare states here
@@ -23,13 +22,20 @@ export default function useAsyncRequest<T, Args extends unknown[]>(
       setError(null);
       setData(null);
 
+      const requestPromise = request(...args);
+      const abortPromise = new Promise((_, reject) => {
+        controller.signal.addEventListener('abort', () => {
+          reject(new DOMException('Aborted', 'AbortError'));
+        });
+      });
+
       try {
         // On success
-        const response = await request(...args, controller.signal);
+        const response = await Promise.race([requestPromise, abortPromise]);
 
-        // Return data
-        setData(response);
-        return { success: true, data: response };
+        // Return data when no error is raised (=== data is successfully received)
+        setData(response as T);
+        return { success: true, data: response as T };
       } catch (error) {
         // On failure
         let caughtError: Error;
