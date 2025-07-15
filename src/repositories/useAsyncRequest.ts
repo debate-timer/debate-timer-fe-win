@@ -4,7 +4,7 @@ import { AbortableRequest } from './AbortableRequest';
 
 export default function useAsyncRequest<T, Args extends unknown[]>(
   request: AbortableRequest<T, Args>,
-  timeout: number = 3000,
+  timeout: number = 5000,
 ) {
   // Declare states here
   const [isLoading, setIsLoading] = useState(false);
