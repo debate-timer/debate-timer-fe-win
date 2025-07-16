@@ -3,11 +3,14 @@ import TableNameAndType from './components/TableNameAndType/TableNameAndType';
 import useFunnel from '../../hooks/useFunnel';
 import useTableFrom from './hook/useTableFrom';
 import TimeBoxStep from './components/TimeBoxStep/TimeBoxStep';
-import { UUID } from 'crypto';
 import { useSearchParams } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import { DebateInfo, DebateTableData, TimeBoxInfo } from '../../type/type';
+import { useEffect, useState } from 'react';
+import { DebateTableData } from '../../type/type';
 import repository from '../../repositories/IPCDebateTableRepository';
+import { isUUID } from '../../util/type_guard';
+import useAsyncRequest from '../../repositories/useAsyncRequest';
+import LoadingIndicator from '../../components/async/LoadingIndicator';
+import ErrorIndicator from '../../components/async/ErrorIndicator';
 
 export type TableCompositionStep = 'NameAndType' | 'TimeBox';
 type Mode = 'edit' | 'add';
@@ -16,7 +19,7 @@ export default function TableComposition() {
   // URL 등으로부터 "editMode"와 "tableId"를 추출
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as Mode;
-  const tableId = (searchParams.get('tableId') || '1-1-1-1-1') as UUID;
+  const id = searchParams.get('tableId');
 
   // Print different funnel page by mode (edit a existing table or add a new table)
   const initialMode: TableCompositionStep =
@@ -25,22 +28,21 @@ export default function TableComposition() {
     useFunnel<TableCompositionStep>(initialMode);
 
   // 테이블 데이터 패칭 분기
-  const [data, setData] = useState<DebateTableData | null>(null);
+  const {
+    error,
+    execute: getTable,
+    isLoading: getLoading,
+  } = useAsyncRequest(repository.getTable);
+  const [initData, setInitData] = useState<DebateTableData>();
 
-  const initData = useMemo(() => {
-    if (mode === 'edit' && data) {
-      const info = data.info as DebateInfo;
-
-      return {
-        info: info,
-        table: data.table as TimeBoxInfo[],
-      };
-    }
-    return undefined;
-  }, [mode, data]);
-
-  const { formData, updateInfo, updateTable, addTable, editTable } =
-    useTableFrom(currentStep, initData);
+  const {
+    formData,
+    updateInfo,
+    updateTable,
+    addTable,
+    editTable,
+    isLoading: postPatchLoading,
+  } = useTableFrom(currentStep, initData);
 
   const handleButtonClick = () => {
     const patchedInfo = {
@@ -52,46 +54,73 @@ export default function TableComposition() {
     updateInfo(patchedInfo);
 
     if (mode === 'edit') {
-      editTable(tableId);
+      if (!isUUID(id)) {
+        throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+      }
+      editTable(id);
     } else {
       addTable();
     }
   };
 
   useEffect(() => {
-    const getData = async (tableId: UUID) => {
-      const data = await repository.getTable(tableId);
-      setData(data);
+    if (mode !== 'edit') {
+      return;
+    }
+
+    const getData = async () => {
+      if (!isUUID(id)) {
+        throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+      }
+      const response = await getTable(id);
+
+      if (response.success) {
+        if (response.data) {
+          setInitData(response.data);
+        }
+      }
     };
 
-    if (mode === 'edit') {
-      getData(tableId);
-    }
-  }, []);
+    getData();
+  }, [getTable, id, mode]);
 
   return (
     <DefaultLayout>
-      <Funnel
-        step={{
-          NameAndType: (
-            <TableNameAndType
-              info={formData.info}
-              isEdit={mode === 'edit'}
-              onInfoChange={updateInfo}
-              onButtonClick={() => goToStep('TimeBox')}
-            />
-          ),
-          TimeBox: (
-            <TimeBoxStep
-              initData={formData}
-              isEdit={mode === 'edit'}
-              onTimeBoxChange={updateTable}
-              onFinishButtonClick={handleButtonClick}
-              onEditTableInfoButtonClick={() => goToStep('NameAndType')}
-            />
-          ),
-        }}
-      />
+      {getLoading && <LoadingIndicator />}
+      {!getLoading && error && (
+        <ErrorIndicator
+          onClickRetry={() => {
+            if (!isUUID(id)) {
+              throw new Error(`테이블 ID(${id})가 올바르지 않아요.`);
+            }
+            getTable(id);
+          }}
+        />
+      )}
+      {!getLoading && !error && (
+        <Funnel
+          step={{
+            NameAndType: (
+              <TableNameAndType
+                info={formData.info}
+                isEdit={mode === 'edit'}
+                onInfoChange={updateInfo}
+                onButtonClick={() => goToStep('TimeBox')}
+              />
+            ),
+            TimeBox: (
+              <TimeBoxStep
+                initData={formData}
+                isEdit={mode === 'edit'}
+                onTimeBoxChange={updateTable}
+                onFinishButtonClick={handleButtonClick}
+                onEditTableInfoButtonClick={() => goToStep('NameAndType')}
+                isLoading={postPatchLoading}
+              />
+            ),
+          }}
+        />
+      )}
     </DefaultLayout>
   );
 }

@@ -13,6 +13,7 @@ import { useBellSound } from './useBellSound';
 import { DebateTableData, TimeBasedStance } from '../../../type/type';
 import repository from '../../../repositories/IPCDebateTableRepository';
 import { UUID } from 'crypto';
+import useAsyncRequest from '../../../repositories/useAsyncRequest';
 
 // ===== 배경 색상 상태 타입 및 컬러 맵 정의 =====
 export type TimerState = 'default' | 'warning' | 'danger' | 'expired';
@@ -27,8 +28,14 @@ export const bgColorMap: Record<TimerState, string> = {
  * 타이머 페이지의 상태(타이머, 라운드, 벨 등) 전반을 관리하는 커스텀 훅
  */
 export function useTimerPageState(tableId: UUID) {
-  const [data, setData] = useState<DebateTableData | null>(null);
   const [bg, setBg] = useState<TimerState>('default');
+  const [data, setData] = useState<DebateTableData | null>(null);
+  const {
+    data: patchedData,
+    error,
+    execute: getTable,
+    isLoading,
+  } = useAsyncRequest(repository.getTable);
 
   // 추가 타이머가 가능한지 여부 (예: 사전에 설정한 "작전 시간"이 있으면 false)
   const isAdditionalTimerAvailable = useMemo(() => {
@@ -129,13 +136,18 @@ export function useTimerPageState(tableId: UUID) {
    * 데이터를 IPC 저장소에서 불러옴
    */
   useEffect(() => {
-    const getItem = async (id: UUID) => {
-      const item = await repository.getTable(id);
-      setData(item);
+    const getData = async () => {
+      const response = await getTable(tableId);
+
+      if (response.success) {
+        if (response.data) {
+          setData(response.data);
+        }
+      }
     };
 
-    getItem(tableId);
-  }, []);
+    getData();
+  }, [getTable, tableId]);
 
   /**
    * 현재 라운드/타이머 상태 변화에 따라 배경 상태(bg) 자동 변경
@@ -311,6 +323,9 @@ export function useTimerPageState(tableId: UUID) {
     switchCamp,
     handleActivateTeam,
     tableId,
+    error,
+    isLoading,
+    patchedData,
   };
 }
 

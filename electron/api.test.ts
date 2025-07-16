@@ -12,6 +12,7 @@ const testDbPath = path.join(TEST_DIR, 'test-db.json');
 const ORIGINAL_SAMPLE_DATA: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
+    datetime: '',
     agenda: '나의 토론 주제',
     name: '나의 시간표',
     prosTeamName: '찬성',

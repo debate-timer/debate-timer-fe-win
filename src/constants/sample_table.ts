@@ -3,6 +3,7 @@ import { DebateTableData } from '../type/type';
 export const SAMPLE_TABLE_DATA: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
+    datetime: '',
     agenda: '나의 토론 주제',
     name: '나의 시간표',
     prosTeamName: '찬성',
@@ -80,6 +81,7 @@ export const SAMPLE_TABLE_DATA: DebateTableData = {
 export const OPEN_DEBATE_MAIN_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
+    datetime: '',
     agenda: '국민연금의 의무 가입을 폐지하여야 한다',
     name: '대한민국 열린토론대회 예선 · 본선',
     prosTeamName: '찬성',
@@ -148,6 +150,7 @@ export const OPEN_DEBATE_MAIN_ROUND: DebateTableData = {
 export const OPEN_DEBATE_FINAL_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
+    datetime: '',
     agenda: '국민연금의 의무 가입을 폐지하여야 한다',
     name: '대한민국 열린토론대회 결선',
     prosTeamName: '찬성',

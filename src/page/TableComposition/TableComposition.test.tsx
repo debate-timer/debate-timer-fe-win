@@ -90,7 +90,9 @@ describe('TableComposition', () => {
   it('Modification flow test', async () => {
     render(
       <TestWrapper
-        initialEntries={['/composition?mode=edit&tableId=1&mode=CUSTOMIZE']}
+        initialEntries={[
+          '/composition?mode=edit&tableId=79800bb7-70a1-4564-b790-e2148967af7e&mode=CUSTOMIZE',
+        ]}
       >
         <TableComposition />
       </TestWrapper>,

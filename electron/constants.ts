@@ -1,9 +1,12 @@
 import { DebateTableData } from './type';
 
+export const DATETIME_FORMAT: string = 'yyyy-MM-dd HH:mm:ss';
+
 export const OPEN_DEBATE_MAIN_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
     agenda: '국민연금 의무 가입을 폐지하여야 한다',
+    datetime: '',
     name: '열린토론대회 예선 · 본선',
     prosTeamName: '찬성',
     consTeamName: '반대',
@@ -72,6 +75,7 @@ export const OPEN_DEBATE_FINAL_ROUND: DebateTableData = {
   info: {
     id: '1-1-1-1-1',
     agenda: '국민연금 의무 가입을 폐지하여야 한다',
+    datetime: '',
     name: '열린토론대회 결선',
     prosTeamName: '찬성',
     consTeamName: '반대',
