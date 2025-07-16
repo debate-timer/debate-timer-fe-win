@@ -7,7 +7,7 @@ interface ErrorIndicatorProps {
 
 export default function ErrorIndicator({
   message = '데이터를 불러오지 못했어요. 다시 시도할까요?',
-  onClickRetry = undefined,
+  onClickRetry,
 }: ErrorIndicatorProps) {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center space-y-4">

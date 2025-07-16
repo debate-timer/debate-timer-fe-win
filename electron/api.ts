@@ -40,6 +40,10 @@ export async function getAllItems(dbPath: string): Promise<DebateTableData[]> {
       const aDt = DateTime.fromFormat(a.info.datetime, DATETIME_FORMAT);
       const bDt = DateTime.fromFormat(b.info.datetime, DATETIME_FORMAT);
 
+      if (!aDt.isValid && !bDt.isValid) return 0;
+      if (!aDt.isValid) return 1;
+      if (!bDt.isValid) return -1;
+
       return aDt.toMillis() - bDt.toMillis();
     });
     return sortedDb;
