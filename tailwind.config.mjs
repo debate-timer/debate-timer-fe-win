@@ -38,7 +38,6 @@ export default {
       },
       fontFamily: {
         pretendard: [
-          '"Pretendard Variable"',
           'Pretendard',
           '-apple-system',
           'BlinkMacSystemFont',
