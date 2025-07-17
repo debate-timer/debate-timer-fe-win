@@ -43,8 +43,8 @@ export default function TimerPage() {
 
   return (
     <>
-      <audio ref={warningBellRef} src="/sounds/bell-warning.mp3" />
-      <audio ref={finishBellRef} src="/sounds/bell-finish.mp3" />
+      <audio ref={warningBellRef} src="./sounds/bell-warning.mp3" />
+      <audio ref={finishBellRef} src="./sounds/bell-finish.mp3" />
 
       <DefaultLayout>
         <DefaultLayout.Header>

@@ -25,7 +25,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.setMenu(null); // Hide menu (File, Edit, View, etc.)
+  // mainWindow.setMenu(null); // Hide menu (File, Edit, View, etc.)
 
   if (VITE_DEV_SERVER_URL) {
     // Development mode
