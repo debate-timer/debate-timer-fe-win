@@ -32,7 +32,7 @@ export function useTimerHotkey(state: TimerPageLogics) {
      */
     const handleKeyDown = (event: KeyboardEvent) => {
       // 핫키로 쓸 키 목록
-      const keysToDisable = [
+      const keysToDisable = new Set([
         'Space',
         'ArrowLeft',
         'ArrowRight',
