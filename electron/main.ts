@@ -14,9 +14,9 @@ function createWindow() {
   // Set window specs
   const mainWindow = new BrowserWindow({
     width: 1280,
-    height: 1080,
+    height: 864,
     minWidth: 1280,
-    minHeight: 1080,
+    minHeight: 864,
     icon: path.join(__dirname, '../renderer/icon.ico'), // Set the window icon
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'), // Path of preload script
