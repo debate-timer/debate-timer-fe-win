@@ -10,7 +10,11 @@ import {
 import { TimeBasedTimerLogics, useTimeBasedTimer } from './useTimeBasedTimer';
 import { NormalTimerLogics, useNormalTimer } from './useNormalTimer';
 import { useBellSound } from './useBellSound';
-import { DebateTableData, TimeBasedStance } from '../../../type/type';
+import {
+  DebateTableData,
+  TimeBasedStance,
+  TimerBGState,
+} from '../../../type/type';
 import repository from '../../../repositories/IPCDebateTableRepository';
 import { UUID } from 'crypto';
 import useAsyncRequest from '../../../repositories/useAsyncRequest';
@@ -23,12 +27,12 @@ export const bgColorMap: Record<TimerState, string> = {
   danger: 'bg-brand-sub3', // 10초 이하
   expired: 'bg-neutral-700', // 0초 이하
 };
+import { useTimerBackground } from './useTimerBackground';
 
 /**
  * 타이머 페이지의 상태(타이머, 라운드, 벨 등) 전반을 관리하는 커스텀 훅
  */
 export function useTimerPageState(tableId: UUID) {
-  const [bg, setBg] = useState<TimerState>('default');
   const [data, setData] = useState<DebateTableData | null>(null);
   const {
     data: patchedData,
@@ -69,6 +73,16 @@ export function useTimerPageState(tableId: UUID) {
     normalTimer,
     isWarningBell: data?.info.warningBell,
     isFinishBell: data?.info.finishBell,
+  });
+
+  // 배경 색상 관련 훅
+  const { bg, setBg } = useTimerBackground({
+    timer1,
+    timer2,
+    normalTimer,
+    prosConsSelected,
+    data,
+    index,
   });
 
   /**
@@ -333,8 +347,8 @@ export interface TimerPageLogics {
   warningBellRef: RefObject<HTMLAudioElement>;
   finishBellRef: RefObject<HTMLAudioElement>;
   data: DebateTableData | null;
-  bg: TimerState;
-  setBg: Dispatch<SetStateAction<TimerState>>;
+  bg: TimerBGState;
+  setBg: Dispatch<SetStateAction<TimerBGState>>;
   isAdditionalTimerAvailable: boolean;
   index: number;
   setIndex: Dispatch<SetStateAction<number>>;
