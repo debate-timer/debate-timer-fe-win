@@ -1,7 +1,7 @@
 {
   "name": "debate-timer-fe-win",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "./",
   "main": "./dist/main/main.js",
   "scripts": {
