@@ -10,25 +10,20 @@ import {
 import { TimeBasedTimerLogics, useTimeBasedTimer } from './useTimeBasedTimer';
 import { NormalTimerLogics, useNormalTimer } from './useNormalTimer';
 import { useBellSound } from './useBellSound';
-import { DebateTableData, TimeBasedStance } from '../../../type/type';
+import {
+  DebateTableData,
+  TimeBasedStance,
+  TimerBGState,
+} from '../../../type/type';
 import repository from '../../../repositories/IPCDebateTableRepository';
 import { UUID } from 'crypto';
 import useAsyncRequest from '../../../repositories/useAsyncRequest';
-
-// ===== 배경 색상 상태 타입 및 컬러 맵 정의 =====
-export type TimerState = 'default' | 'warning' | 'danger' | 'expired';
-export const bgColorMap: Record<TimerState, string> = {
-  default: '',
-  warning: 'bg-brand-main', // 30초~11초 구간
-  danger: 'bg-brand-sub3', // 10초 이하
-  expired: 'bg-neutral-700', // 0초 이하
-};
+import { useTimerBackground } from './useTimerBackground';
 
 /**
  * 타이머 페이지의 상태(타이머, 라운드, 벨 등) 전반을 관리하는 커스텀 훅
  */
 export function useTimerPageState(tableId: UUID) {
-  const [bg, setBg] = useState<TimerState>('default');
   const [data, setData] = useState<DebateTableData | null>(null);
   const {
     data: patchedData,
@@ -40,12 +35,7 @@ export function useTimerPageState(tableId: UUID) {
   // 추가 타이머가 가능한지 여부 (예: 사전에 설정한 "작전 시간"이 있으면 false)
   const isAdditionalTimerAvailable = useMemo(() => {
     if (data) {
-      return data.table.every((value) => {
-        if (value.speechType !== '작전 시간') {
-          return true;
-        }
-        return false;
-      });
+      return !data.table.some((value) => value.speechType === '작전 시간');
     }
     return true;
   }, [data]);
@@ -54,8 +44,8 @@ export function useTimerPageState(tableId: UUID) {
   const [index, setIndex] = useState(0);
 
   // 자유토론 타이머, 일반 타이머 상태 관리 커스텀 훅
-  const timer1 = useTimeBasedTimer({});
-  const timer2 = useTimeBasedTimer({});
+  const timer1 = useTimeBasedTimer();
+  const timer2 = useTimeBasedTimer();
   const normalTimer = useNormalTimer();
 
   // 현재 발언자('PROS'/'CONS')
@@ -69,6 +59,16 @@ export function useTimerPageState(tableId: UUID) {
     normalTimer,
     isWarningBell: data?.info.warningBell,
     isFinishBell: data?.info.finishBell,
+  });
+
+  // 배경 색상 관련 훅
+  const { bg, setBg } = useTimerBackground({
+    timer1,
+    timer2,
+    normalTimer,
+    prosConsSelected,
+    data,
+    index,
   });
 
   /**
@@ -90,47 +90,64 @@ export function useTimerPageState(tableId: UUID) {
   );
 
   /**
+   * 발언 진영 전환(ENTER 키/버튼)
+   * - pros → cons, cons → pros로 타이머/상태 전환
+   */
+  const switchCamp = useCallback(() => {
+    // 1. 현재 팀과 다음 팀의 정보 설정
+    const currentTimer = prosConsSelected === 'PROS' ? timer1 : timer2;
+    const nextTimer = prosConsSelected === 'PROS' ? timer2 : timer1;
+    const nextTeam = prosConsSelected === 'PROS' ? 'CONS' : 'PROS';
+
+    // 2. 상대 팀이 시간을 모두 소진했을 경우, 차례를 넘기지 않고 반환
+    if (nextTimer.isDone) {
+      return;
+    }
+
+    // 3. 현재 팀의 발언이 종료되었는지 확인
+    const isOpponentDone =
+      currentTimer.totalTimer !== null && currentTimer.totalTimer <= 0;
+
+    // 4. 현재 타이머를 멈추기 전, 실행 중이었는지를 저장
+    const wasRunning = currentTimer.isRunning;
+
+    // 5. 이제 현재 타이머를 정지하고...
+    currentTimer.pauseTimer();
+
+    // 6. 발언권을 다음 팀에게 넘김 (현재 발언권 가진 팀을 다음 팀으로 설정)
+    setProsConsSelected(nextTeam);
+
+    if (wasRunning) {
+      // 7-1. 만약 타이머가 실행 중이었다면, 다음 타이머 초기화 후 즉시 시작
+      nextTimer.resetAndStartTimer(isOpponentDone);
+    } else {
+      // 7-1. 만약 타이머가 멈춰 있었다면, 다음 타이머 초기화만 진행
+      nextTimer.resetTimerForNextPhase(isOpponentDone);
+    }
+  }, [prosConsSelected, timer1, timer2]);
+
+  /**
    * 특정 진영(팀)을 활성화하는 함수
    * - 사용자가 좌/우 타이머 영역을 직접 클릭할 때 사용
    * - 현재 진영이 아닌 타이머를 클릭한 경우에만 동작
    */
   const handleActivateTeam = useCallback(
     (team: TimeBasedStance) => {
-      const isPros = team === 'PROS';
-      const currentTimer = isPros ? timer1 : timer2;
-      const otherTimer = isPros ? timer2 : timer1;
-      if (currentTimer.isDone) return;
+      const clickedTimerStance = team === 'PROS' ? 'PROS' : 'CONS';
+      const clickedTimer = clickedTimerStance === 'PROS' ? timer1 : timer2;
 
-      // 반대편에서 클릭했을 때만
-      if (prosConsSelected !== team) {
-        if (otherTimer.isRunning) {
-          otherTimer.pauseTimer();
-          currentTimer.startTimer();
-          setProsConsSelected(team);
-        } else {
-          otherTimer.pauseTimer();
-          setProsConsSelected(team);
-        }
+      // 클릭한 타이머가 현재 타이머와 동일한 타이머라면, 바로 반환
+      if (prosConsSelected === clickedTimerStance) return;
+
+      // 아니라면, 타이머 변경
+      if (clickedTimer.isDone) {
+        setProsConsSelected(clickedTimerStance);
+      } else {
+        switchCamp();
       }
     },
-    [prosConsSelected, timer1, timer2],
+    [prosConsSelected, switchCamp, timer1, timer2],
   );
-
-  /**
-   * 발언 진영 전환(ENTER 키/버튼)
-   * - pros → cons, cons → pros로 타이머/상태 전환
-   */
-  const switchCamp = useCallback(() => {
-    const currentTimer = prosConsSelected === 'PROS' ? timer1 : timer2;
-    const nextTimer = prosConsSelected === 'PROS' ? timer2 : timer1;
-    const nextTeam = prosConsSelected === 'PROS' ? 'CONS' : 'PROS';
-    if (nextTimer.isDone) return;
-    currentTimer.pauseTimer();
-    if (!nextTimer.isDone && currentTimer.isRunning) {
-      nextTimer.startTimer();
-    }
-    setProsConsSelected(nextTeam);
-  }, [prosConsSelected, timer1, timer2]);
 
   /**
    * 데이터를 IPC 저장소에서 불러옴
@@ -148,63 +165,6 @@ export function useTimerPageState(tableId: UUID) {
 
     getData();
   }, [getTable, tableId]);
-
-  /**
-   * 현재 라운드/타이머 상태 변화에 따라 배경 상태(bg) 자동 변경
-   */
-  useEffect(() => {
-    // 각 타이머별 상태에 따라 warning/danger/expired 판정
-    const getBgStatus = () => {
-      const boxType = data?.table[index].boxType;
-
-      // 발언 타이머 기준 상태 산정 함수
-      const getTimerStatus = (
-        speakingTimer: number | null,
-        totalTimer: number | null,
-      ) => {
-        const activeTimer = speakingTimer !== null ? speakingTimer : totalTimer;
-        if (activeTimer !== null) {
-          if (activeTimer > 10 && activeTimer <= 30) return 'warning';
-          if (activeTimer >= 0 && activeTimer <= 10) return 'danger';
-        }
-        return 'default';
-      };
-
-      if (boxType === 'NORMAL') {
-        if (!normalTimer.isRunning) return 'default';
-        if (normalTimer.timer !== null) {
-          if (normalTimer.timer > 10 && normalTimer.timer <= 30)
-            return 'warning';
-          if (normalTimer.timer >= 0 && normalTimer.timer <= 10)
-            return 'danger';
-          if (normalTimer.timer < 0) return 'expired';
-          return 'default';
-        }
-      }
-      if (boxType === 'TIME_BASED') {
-        if (prosConsSelected === 'PROS' && timer1.isRunning) {
-          return getTimerStatus(timer1.speakingTimer, timer1.totalTimer);
-        }
-        if (prosConsSelected === 'CONS' && timer2.isRunning) {
-          return getTimerStatus(timer2.speakingTimer, timer2.totalTimer);
-        }
-      }
-      return 'default';
-    };
-    setBg(getBgStatus());
-  }, [
-    normalTimer.isRunning,
-    normalTimer.timer,
-    timer1.isRunning,
-    timer1.totalTimer,
-    timer1.speakingTimer,
-    timer2.isRunning,
-    timer2.totalTimer,
-    timer2.speakingTimer,
-    prosConsSelected,
-    index,
-    data,
-  ]);
 
   /**
    * 라운드 이동/초기 진입 시 타이머 상태 초기화 및 셋업
@@ -230,12 +190,7 @@ export function useTimerPageState(tableId: UUID) {
       const defaultSpeakingTimer = currentBox.timePerSpeaking;
       [timer1, timer2].forEach((timer) => {
         timer.setDefaultTime({ defaultTotalTimer, defaultSpeakingTimer });
-        timer.setSavedTime({
-          savedTotalTimer: defaultTotalTimer,
-          savedSpeakingTimer: defaultSpeakingTimer,
-        });
         timer.setTimers(defaultTotalTimer, defaultSpeakingTimer);
-        timer.setIsSpeakingTimer(true);
         timer.setIsDone(false);
       });
     }
@@ -252,15 +207,13 @@ export function useTimerPageState(tableId: UUID) {
   ]);
 
   /**
-   * 진영 전환 시, 상대 타이머를 발언 구간에 맞게 초기화
+   * 진영 전환 시, 상대 타이머가 작동 가능하면 isDone을 false로 변경
    */
   useEffect(() => {
-    if (prosConsSelected === 'CONS') {
-      if (timer1.speakingTimer === null) return;
-      timer1.resetTimerForNextPhase();
-    } else if (prosConsSelected === 'PROS') {
-      if (timer2.speakingTimer === null) return;
-      timer2.resetTimerForNextPhase();
+    const isPros = prosConsSelected === 'PROS';
+    const opponentTimer = isPros ? timer2 : timer1;
+    if (opponentTimer.totalTimer !== null && opponentTimer.totalTimer > 0) {
+      opponentTimer.setIsDone(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prosConsSelected]);
@@ -269,11 +222,11 @@ export function useTimerPageState(tableId: UUID) {
    * 각 타이머가 종료 시 자동으로 타이머 일시정지
    */
   useEffect(() => {
-    if (timer1.speakingTimer === 0 || timer1.totalTimer === 0) {
-      timer1.pauseTimer();
-    } else if (timer2.speakingTimer === 0 || timer2.totalTimer === 0) {
-      timer2.pauseTimer();
-    }
+    [timer1, timer2].forEach((timer) => {
+      if (timer.speakingTimer === 0 || timer.totalTimer === 0) {
+        timer.pauseTimer();
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     timer1.speakingTimer,
@@ -333,8 +286,8 @@ export interface TimerPageLogics {
   warningBellRef: RefObject<HTMLAudioElement>;
   finishBellRef: RefObject<HTMLAudioElement>;
   data: DebateTableData | null;
-  bg: TimerState;
-  setBg: Dispatch<SetStateAction<TimerState>>;
+  bg: TimerBGState;
+  setBg: Dispatch<SetStateAction<TimerBGState>>;
   isAdditionalTimerAvailable: boolean;
   index: number;
   setIndex: Dispatch<SetStateAction<number>>;

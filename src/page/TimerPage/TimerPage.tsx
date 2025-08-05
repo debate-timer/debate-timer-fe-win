@@ -4,7 +4,7 @@ import HeaderTableInfo from '../../components/HeaderTableInfo/HeaderTableInfo';
 import HeaderTitle from '../../components/HeaderTitle/HeaderTitle';
 import IconButton from '../../components/IconButton/IconButton';
 import { IoHelpCircle } from 'react-icons/io5';
-import { bgColorMap, useTimerPageState } from './hooks/useTimerPageState';
+import { useTimerPageState } from './hooks/useTimerPageState';
 import { useTimerHotkey } from './hooks/useTimerHotkey';
 import RoundControlRow from './components/RoundControlRow';
 import TimerView from './components/TimerView';
@@ -13,6 +13,7 @@ import { FirstUseToolTipModal } from './components/FirstUseToolTipModal';
 import { isUUID } from '../../util/type_guard';
 import LoadingIndicator from '../../components/async/LoadingIndicator';
 import ErrorIndicator from '../../components/async/ErrorIndicator';
+import { bgColorMap } from '../../type/type';
 
 export default function TimerPage() {
   const { id } = useParams();
