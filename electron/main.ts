@@ -17,7 +17,7 @@ function createWindow() {
     height: 864,
     minWidth: 1280,
     minHeight: 864,
-    icon: path.join(__dirname, '../renderer/icon.ico'), // Set the window icon
+    icon: path.join(__dirname, '../renderer/dt-logo.png'), // Set the window icon
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'), // Path of preload script
       nodeIntegration: false,

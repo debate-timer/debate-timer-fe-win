@@ -103,7 +103,7 @@
           ]
         }
       ],
-      "icon": "build/icon.ico",
+      "icon": "public/dt-logo.png",
       "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
     },
     "nsis": {
@@ -112,8 +112,8 @@
       "shortcutName": "Debate Timer",
       "runAfterFinish": true,
       "createDesktopShortcut": true,
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "installerIcon": "public/dt-logo.ico",
+      "uninstallerIcon": "public/dt-logo.ico"
     }
   }
 }
