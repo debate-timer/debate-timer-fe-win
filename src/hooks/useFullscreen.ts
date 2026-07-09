@@ -79,15 +79,19 @@ export default function useFullscreen() {
   }, [handleFullscreenChange]);
 
   // 토글 함수
+  // - React state(isFullscreen)는 fullscreenchange 이벤트로 뒤늦게 갱신되므로,
+  //   빠른 연속 클릭 시 오분기(진입해야 하는데 해제 시도 등)를 막기 위해
+  //   실제 DOM 상태(getFullscreenElement)를 직접 읽어 분기한다.
   const toggleFullscreen = useCallback(async () => {
     const element = document.documentElement as HTMLElementWithFullscreen;
+    const isCurrentlyFullscreen = !!getFullscreenElement();
 
-    if (isFullscreen) {
+    if (isCurrentlyFullscreen) {
       await exitFullscreen();
     } else {
       await enterFullscreen(element);
     }
-  }, [isFullscreen]);
+  }, []);
 
   // 값을 직접입력하는 함수
   const setFullscreen = useCallback(async (value: boolean) => {
