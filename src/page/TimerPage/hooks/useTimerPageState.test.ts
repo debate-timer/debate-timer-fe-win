@@ -6,10 +6,10 @@ import {
 
 /**
  * 빠른 왕복 팀전환 시 1회당 발언시간 유지 여부 판단 로직 검증
- * - 3초룰: 잔여 발언시간을 남긴 채 3초 이내 복귀 시에만 이어가기(true)
- * - 발언시간을 모두 소진하고 떠났다면 3초룰과 무관하게 항상 초기화(false)
+ * - 2초룰: 잔여 발언시간을 남긴 채 2초 이내 복귀 시에만 이어가기(true)
+ * - 발언시간을 모두 소진하고 떠났다면 2초룰과 무관하게 항상 초기화(false)
  */
-describe('shouldReuseSpeakingTime - 3초룰 판단', () => {
+describe('shouldReuseSpeakingTime - 2초룰 판단', () => {
   // 대부분의 케이스가 공유하는 기본 입력 (1회당 발언시간 사용, lastYielded=0 기준)
   const base = {
     isSpeakingTimerAvailable: true,
@@ -19,15 +19,15 @@ describe('shouldReuseSpeakingTime - 3초룰 판단', () => {
     now: 0,
   };
 
-  test('1. 잔여 시간 남기고 3초 이내 복귀 → 이어가기(true)', () => {
-    expect(shouldReuseSpeakingTime({ ...base, now: 2000 })).toBe(true);
+  test('1. 잔여 시간 남기고 2초 이내 복귀 → 이어가기(true)', () => {
+    expect(shouldReuseSpeakingTime({ ...base, now: 1000 })).toBe(true);
   });
 
-  test('2. 3초 초과 복귀 → 초기화(false)', () => {
-    expect(shouldReuseSpeakingTime({ ...base, now: 3001 })).toBe(false);
+  test('2. 2초 초과 복귀 → 초기화(false)', () => {
+    expect(shouldReuseSpeakingTime({ ...base, now: 2001 })).toBe(false);
   });
 
-  test('3. 경계값 정확히 3초 → 이어가기(true, <=)', () => {
+  test('3. 경계값 정확히 2초 → 이어가기(true, <=)', () => {
     expect(
       shouldReuseSpeakingTime({ ...base, now: QUICK_RETURN_THRESHOLD_MS }),
     ).toBe(true);

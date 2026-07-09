@@ -8,7 +8,19 @@ import { useTimeBasedTimer } from './useTimeBasedTimer';
  */
 describe('useTimeBasedTimer - 시간초과 허용', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    // 타이머 계산이 단조 시계(performance.now())를 쓰므로, Date뿐 아니라 performance도 함께 fake 처리
+    vi.useFakeTimers({
+      toFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'Date',
+        'performance',
+      ],
+    });
   });
 
   afterEach(() => {
@@ -98,7 +110,19 @@ describe('useTimeBasedTimer - 시간초과 허용', () => {
  */
 describe('useTimeBasedTimer - 빠른 왕복 메커니즘', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    // 타이머 계산이 단조 시계(performance.now())를 쓰므로, Date뿐 아니라 performance도 함께 fake 처리
+    vi.useFakeTimers({
+      toFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'Date',
+        'performance',
+      ],
+    });
   });
 
   afterEach(() => {

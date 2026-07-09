@@ -6,6 +6,7 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react';
+import { OVERFLOW_FLOOR_SECONDS, monotonicNow } from '../../../util/time';
 
 /**
  * 토론에서 사용하는 커스텀 타이머 훅
@@ -43,7 +44,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
   const speakingTargetTimeRef = useRef<number | null>(null);
 
   // 이 팀이 마지막으로 발언권을 넘긴(팀 전환으로 비활성화된) 시각(ms)
-  // - 짧은 시간(3초) 내 다시 돌아왔는지 판단해 1회당 발언 시간 초기화 여부를 결정
+  // - 짧은 시간(2초) 내 다시 돌아왔는지 판단해 1회당 발언 시간 초기화 여부를 결정
   const lastYieldedAtRef = useRef<number | null>(null);
 
   /**
@@ -60,8 +61,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
         return;
       }
 
-      // 현재 시각 확인
-      const now = Date.now();
+      // 현재 시각 확인 (단조 증가 시계 사용 — 벽시계 점프의 영향을 받지 않음)
+      const now = monotonicNow();
 
       // 목표 시각까지 얼마나 더 필요한지, 남은 시간을 초 단위로 계산
       const remainingTotal = targetTimeRef.current - now;
@@ -79,8 +80,12 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
         const remainingSpeaking = speakingTargetTimeRef.current - now;
         // 시간초과 허용 시에는 0에서 클램프하지 않고 마이너스로 계속 흐르게 함
         // (일반 타이머 useNormalTimer와 동일한 방식)
+        // 단, 시계 이상 등으로 비정상적으로 큰 음수가 노출되지 않도록 하한 클램프로 방어
         const remainingSpeakingSeconds = allowOverflow
-          ? Math.ceil(remainingSpeaking / 1000)
+          ? Math.max(
+              OVERFLOW_FLOOR_SECONDS,
+              Math.ceil(remainingSpeaking / 1000),
+            )
           : Math.max(0, Math.ceil(remainingSpeaking / 1000));
         setSpeakingTimer(remainingSpeakingSeconds);
       }
@@ -102,7 +107,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     // 예를 들어, 현재 시각이 오후 13시 00분 30초인데, 1회당 발언 시간이 30초라면,
     // 1회당 발언 시간이 모두 끝나는 시간은 13시 01분 00초이므로,
     // 해당 시간을 목표 시간으로 두는 식임
-    const startTime = Date.now();
+    const startTime = monotonicNow();
     targetTimeRef.current = startTime + totalTimer * 1000;
     if (isSpeakingTimerAvailable) {
       speakingTargetTimeRef.current = startTime + speakingTimer * 1000;
@@ -225,7 +230,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
       // 예를 들어, 현재 시각이 오후 13시 00분 30초인데, 1회당 발언 시간이 30초라면,
       // 1회당 발언 시간이 모두 끝나는 시간은 13시 01분 00초이므로,
       // 해당 시간을 목표 시간으로 두는 식임
-      const startTime = Date.now();
+      const startTime = monotonicNow();
       targetTimeRef.current = startTime + totalTimer * 1000;
       if (isSpeakingTimerAvailable) {
         speakingTargetTimeRef.current = startTime + newTime * 1000;
