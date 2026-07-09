@@ -42,6 +42,10 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
   const targetTimeRef = useRef<number | null>(null);
   const speakingTargetTimeRef = useRef<number | null>(null);
 
+  // 이 팀이 마지막으로 발언권을 넘긴(팀 전환으로 비활성화된) 시각(ms)
+  // - 짧은 시간(3초) 내 다시 돌아왔는지 판단해 1회당 발언 시간 초기화 여부를 결정
+  const lastYieldedAtRef = useRef<number | null>(null);
+
   /**
    * 타이머 시작을 위해 사용하는 저수준 함수
    */
@@ -240,6 +244,18 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
   );
 
   /**
+   * 이 팀이 발언권을 넘긴(팀 전환으로 비활성화된) 시각을 기록
+   */
+  const markYielded = useCallback(() => {
+    lastYieldedAtRef.current = Date.now();
+  }, []);
+
+  /**
+   * 마지막으로 발언권을 넘긴 시각 조회 (없으면 null)
+   */
+  const getLastYieldedAt = useCallback(() => lastYieldedAtRef.current, []);
+
+  /**
    * 외부에서 전체/발언 타이머를 지정값으로 재설정
    * - start/pause 후 원하는 값 지정할 때 사용
    */
@@ -263,6 +279,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     setSpeakingTimer(null);
     setIsDone(false);
     intervalRef.current = null;
+    // 라운드/발언칸 전환 시 이전 기록으로 인한 오작동 방지
+    lastYieldedAtRef.current = null;
   }, [pauseTimer]);
 
   useEffect(() => () => pauseTimer(), [pauseTimer]);
@@ -285,6 +303,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     setDefaultTime,
     setIsDone,
     clearTimer,
+    markYielded,
+    getLastYieldedAt,
   };
 }
 
@@ -314,4 +334,6 @@ export interface TimeBasedTimerLogics {
   >;
   setIsDone: Dispatch<SetStateAction<boolean>>;
   clearTimer: () => void;
+  markYielded: () => void;
+  getLastYieldedAt: () => number | null;
 }

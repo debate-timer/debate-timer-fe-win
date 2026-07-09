@@ -20,6 +20,40 @@ import { UUID } from 'crypto';
 import useAsyncRequest from '../../../repositories/useAsyncRequest';
 import { useTimerBackground } from './useTimerBackground';
 
+// 팀 전환 후 같은 팀으로 되돌아온 것을 "실수/첨언"으로 간주하는 시간 임계값(ms)
+export const QUICK_RETURN_THRESHOLD_MS = 3000;
+
+/**
+ * 팀 전환 시 다음 팀의 1회당 발언시간을 "초기화하지 않고 이어서" 사용할지 판단
+ * - 3초룰: 잔여 발언시간을 남긴 채(speakingTimer > 0) 3초 이내에 되돌아온 경우에만 이어가기
+ * - 1회당 발언시간을 모두 소진(speakingTimer <= 0)하고 떠났다면 항상 초기화(false)
+ */
+export function shouldReuseSpeakingTime(params: {
+  isSpeakingTimerAvailable: boolean;
+  speakingTimer: number | null;
+  isOpponentDone: boolean;
+  lastYieldedAt: number | null;
+  now: number;
+  thresholdMs?: number;
+}): boolean {
+  const {
+    isSpeakingTimerAvailable,
+    speakingTimer,
+    isOpponentDone,
+    lastYieldedAt,
+    now,
+    thresholdMs = QUICK_RETURN_THRESHOLD_MS,
+  } = params;
+  return (
+    isSpeakingTimerAvailable &&
+    speakingTimer !== null &&
+    speakingTimer > 0 && // 1회당 발언시간을 다 쓰지 않고 떠났을 때만 이어가기
+    !isOpponentDone &&
+    lastYieldedAt !== null &&
+    now - lastYieldedAt <= thresholdMs
+  );
+}
+
 /**
  * 타이머 페이지의 상태(타이머, 라운드, 벨 등) 전반을 관리하는 커스텀 훅
  */
@@ -111,17 +145,34 @@ export function useTimerPageState(tableId: UUID) {
     // 4. 현재 타이머를 멈추기 전, 실행 중이었는지를 저장
     const wasRunning = currentTimer.isRunning;
 
-    // 5. 이제 현재 타이머를 정지하고...
-    currentTimer.pauseTimer();
+    // 5. 다음 팀이 발언권을 넘긴 뒤 3초 이내에 되돌아오는 경우인지 판단(티키타카 첨언 방지)
+    //    - 이 경우 1회당 발언 시간을 초기화하지 않고 남은 값 그대로 이어서 사용
+    const isQuickReturn = shouldReuseSpeakingTime({
+      isSpeakingTimerAvailable: nextTimer.isSpeakingTimerAvailable,
+      speakingTimer: nextTimer.speakingTimer,
+      isOpponentDone,
+      lastYieldedAt: nextTimer.getLastYieldedAt(),
+      now: Date.now(),
+    });
 
-    // 6. 발언권을 다음 팀에게 넘김 (현재 발언권 가진 팀을 다음 팀으로 설정)
+    // 6. 이제 현재 타이머를 정지하고, 발언권을 넘긴 시각을 기록
+    currentTimer.pauseTimer();
+    currentTimer.markYielded();
+
+    // 7. 발언권을 다음 팀에게 넘김 (현재 발언권 가진 팀을 다음 팀으로 설정)
     setProsConsSelected(nextTeam);
 
-    if (wasRunning) {
-      // 7-1. 만약 타이머가 실행 중이었다면, 다음 타이머 초기화 후 즉시 시작
+    if (isQuickReturn) {
+      // 8-1. 빠른 복귀: 1회당 발언 시간을 초기화하지 않고 남은 값 그대로 이어서 사용
+      //      (실행 중이었을 때만 재개; 정지 상태였다면 남은 값 유지)
+      if (wasRunning) {
+        nextTimer.startTimer();
+      }
+    } else if (wasRunning) {
+      // 8-2. 만약 타이머가 실행 중이었다면, 다음 타이머 초기화 후 즉시 시작
       nextTimer.resetAndStartTimer(isOpponentDone);
     } else {
-      // 7-1. 만약 타이머가 멈춰 있었다면, 다음 타이머 초기화만 진행
+      // 8-3. 만약 타이머가 멈춰 있었다면, 다음 타이머 초기화만 진행
       nextTimer.resetTimerForNextPhase(isOpponentDone);
     }
   }, [prosConsSelected, timer1, timer2]);

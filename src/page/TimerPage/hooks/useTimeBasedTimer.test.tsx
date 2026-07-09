@@ -90,3 +90,85 @@ describe('useTimeBasedTimer - 시간초과 허용', () => {
     expect(result.current.totalTimer).toBe(0);
   });
 });
+
+/**
+ * 빠른 왕복 팀전환 관련 메커니즘 검증
+ * - pause 후 다시 start하면 1회당 발언시간이 초기화되지 않고 남은 값부터 이어짐
+ * - markYielded/getLastYieldedAt 기록 및 clearTimer 초기화
+ */
+describe('useTimeBasedTimer - 빠른 왕복 메커니즘', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.clearAllTimers();
+    });
+    vi.useRealTimers();
+  });
+
+  test('2-1. pause 후 재개 시 1회당 발언시간이 리셋되지 않고 남은 값부터 이어진다', () => {
+    const { result } = renderHook(() => useTimeBasedTimer());
+
+    act(() => {
+      result.current.setDefaultTime({
+        defaultTotalTimer: 120,
+        defaultSpeakingTimer: 120,
+      });
+      result.current.setTimers(120, 120);
+    });
+    act(() => {
+      result.current.startTimer();
+    });
+    // 90초 경과 → 1회당 발언시간 약 30초 남음
+    act(() => {
+      vi.advanceTimersByTime(90000);
+    });
+    expect(result.current.speakingTimer).toBe(30);
+
+    // 실수 전환처럼 정지
+    act(() => {
+      result.current.pauseTimer();
+    });
+
+    // 다시 시작(초기화 없이 재개) 후 짧게 진행
+    act(() => {
+      result.current.startTimer();
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // 120으로 리셋되지 않고 30 부근에서 이어져야 함
+    expect(result.current.speakingTimer).toBeLessThanOrEqual(30);
+    expect(result.current.speakingTimer).toBeGreaterThan(20);
+  });
+
+  test('2-2. markYielded 후 getLastYieldedAt이 기록된 시각을 반환한다', () => {
+    const { result } = renderHook(() => useTimeBasedTimer());
+
+    // 초기에는 기록 없음
+    expect(result.current.getLastYieldedAt()).toBeNull();
+
+    act(() => {
+      result.current.markYielded();
+    });
+
+    expect(result.current.getLastYieldedAt()).toBe(Date.now());
+  });
+
+  test('2-3. clearTimer가 발언권 넘긴 기록을 초기화한다(라운드 이동 시 stale 방지)', () => {
+    const { result } = renderHook(() => useTimeBasedTimer());
+
+    act(() => {
+      result.current.markYielded();
+    });
+    expect(result.current.getLastYieldedAt()).not.toBeNull();
+
+    act(() => {
+      result.current.clearTimer();
+    });
+    expect(result.current.getLastYieldedAt()).toBeNull();
+  });
+});
