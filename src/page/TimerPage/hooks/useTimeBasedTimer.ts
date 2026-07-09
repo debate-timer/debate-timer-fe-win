@@ -34,6 +34,10 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
   // 타이머가 0이 되면 true (완료 상태)
   const [isDone, setIsDone] = useState(false);
 
+  // 1회당 발언 시간(speakingTimer) 초과 허용 여부
+  // - true면 speakingTimer가 0 이하로도(마이너스) 계속 흐름
+  const [allowOverflow, setAllowOverflow] = useState(false);
+
   // 실제 시간 계산용 레퍼런스
   const targetTimeRef = useRef<number | null>(null);
   const speakingTargetTimeRef = useRef<number | null>(null);
@@ -69,14 +73,15 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
         }
 
         const remainingSpeaking = speakingTargetTimeRef.current - now;
-        const remainingSpeakingSeconds = Math.max(
-          0,
-          Math.ceil(remainingSpeaking / 1000),
-        );
+        // 시간초과 허용 시에는 0에서 클램프하지 않고 마이너스로 계속 흐르게 함
+        // (일반 타이머 useNormalTimer와 동일한 방식)
+        const remainingSpeakingSeconds = allowOverflow
+          ? Math.ceil(remainingSpeaking / 1000)
+          : Math.max(0, Math.ceil(remainingSpeaking / 1000));
         setSpeakingTimer(remainingSpeakingSeconds);
       }
     }, 200);
-  }, [isSpeakingTimerAvailable]);
+  }, [isSpeakingTimerAvailable, allowOverflow]);
 
   /**
    * 타이머 카운트다운 시작
@@ -269,6 +274,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     isDone,
     defaultTime,
     isSpeakingTimerAvailable,
+    allowOverflow,
+    setAllowOverflow,
     startTimer,
     pauseTimer,
     resetTimerForNextPhase,
@@ -291,6 +298,8 @@ export interface TimeBasedTimerLogics {
     defaultSpeakingTimer: number | null;
   };
   isSpeakingTimerAvailable: boolean;
+  allowOverflow: boolean;
+  setAllowOverflow: Dispatch<SetStateAction<boolean>>;
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimerForNextPhase: (isOpponentDone: boolean) => number;

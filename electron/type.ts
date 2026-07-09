@@ -12,6 +12,9 @@ export interface TimeBoxInfo {
   timePerTeam: number | null;
   timePerSpeaking: number | null;
   speaker: string | null;
+  // 자유토론(TIME_BASED)에서 1회당 발언 시간(timePerSpeaking)을 초과해도
+  // 타이머를 마이너스로 계속 흐르게 할지 여부 (기본 false)
+  allowSpeakingOverflow?: boolean;
 }
 
 export interface DebateInfo {

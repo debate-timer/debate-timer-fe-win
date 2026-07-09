@@ -110,6 +110,9 @@ export default function TimeBasedTimer({
                   현재 시간
                 </div>
                 <div className="flex flex-row items-center justify-center text-center xl:space-x-3">
+                  {(speakingTimer ?? 0) < 0 && (
+                    <p className="w-[30px] lg:w-[45px]">-</p>
+                  )}
                   <p className="w-[110px] lg:w-[150px] xl:w-[170px]">
                     {speakingMinute}
                   </p>

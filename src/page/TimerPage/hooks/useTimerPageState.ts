@@ -188,10 +188,12 @@ export function useTimerPageState(tableId: UUID) {
       normalTimer.clearTimer();
       const defaultTotalTimer = currentBox.timePerTeam;
       const defaultSpeakingTimer = currentBox.timePerSpeaking;
+      const allowOverflow = currentBox.allowSpeakingOverflow ?? false;
       [timer1, timer2].forEach((timer) => {
         timer.setDefaultTime({ defaultTotalTimer, defaultSpeakingTimer });
         timer.setTimers(defaultTotalTimer, defaultSpeakingTimer);
         timer.setIsDone(false);
+        timer.setAllowOverflow(allowOverflow);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,7 +225,12 @@ export function useTimerPageState(tableId: UUID) {
    */
   useEffect(() => {
     [timer1, timer2].forEach((timer) => {
-      if (timer.speakingTimer === 0 || timer.totalTimer === 0) {
+      // 전체 시간이 소진되면 항상 정지 (시간초과 허용이어도 여기서 멈춤)
+      if (timer.totalTimer === 0) {
+        timer.pauseTimer();
+      }
+      // 시간초과 허용이 아닐 때만 발언 시간 0에서 정지
+      else if (!timer.allowOverflow && timer.speakingTimer === 0) {
         timer.pauseTimer();
       }
     });
@@ -241,8 +248,9 @@ export function useTimerPageState(tableId: UUID) {
   useEffect(() => {
     const selectedTimer = prosConsSelected === 'PROS' ? timer1 : timer2;
 
+    // 시간초과 허용이거나 발언 타이머가 없으면 전체 시간 소진 시에만 완료 처리
     const isDone =
-      selectedTimer.speakingTimer === null
+      selectedTimer.speakingTimer === null || selectedTimer.allowOverflow
         ? selectedTimer.totalTimer === 0
         : selectedTimer.speakingTimer === 0;
 
