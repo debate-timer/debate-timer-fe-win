@@ -4,6 +4,8 @@ import HeaderTableInfo from '../../components/HeaderTableInfo/HeaderTableInfo';
 import HeaderTitle from '../../components/HeaderTitle/HeaderTitle';
 import IconButton from '../../components/IconButton/IconButton';
 import { IoHelpCircle } from 'react-icons/io5';
+import { RiFullscreenFill, RiFullscreenExitFill } from 'react-icons/ri';
+import useFullscreen from '../../hooks/useFullscreen';
 import { useTimerPageState } from './hooks/useTimerPageState';
 import { useTimerHotkey } from './hooks/useTimerHotkey';
 import RoundControlRow from './components/RoundControlRow';
@@ -28,6 +30,7 @@ export default function TimerPage() {
   const { openUseTooltipModal, UseToolTipWrapper, closeUseTooltipModal } =
     useTimerPageModal();
   const state = useTimerPageState(tableId);
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
 
   useTimerHotkey(state);
   const {
@@ -68,6 +71,17 @@ export default function TimerPage() {
             />
           </DefaultLayout.Header.Center>
           <DefaultLayout.Header.Right>
+            <IconButton
+              icon={
+                isFullscreen ? (
+                  <RiFullscreenExitFill size={24} />
+                ) : (
+                  <RiFullscreenFill size={24} />
+                )
+              }
+              title="전체 화면"
+              onClick={toggleFullscreen}
+            />
             <IconButton
               icon={<IoHelpCircle size={24} />}
               onClick={openUseTooltipModal}
