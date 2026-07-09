@@ -26,8 +26,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Windows installer (ia32 + x64)
-        run: npm run electron:build -- --win --publish never
+      # electron:build 스크립트는 `vite build && electron-builder` 형태라
+      # `npm run electron:build -- --win`으로는 플래그가 electron-builder에 제대로 전달되지 않는다.
+      # (compound 스크립트 + npm `--` 전달 이슈) → 두 단계로 분리해 직접 호출한다.
+      - name: Build web assets (vite)
+        run: npx vite build
+
+      - name: Package Windows installer (ia32 + x64)
+        run: npx electron-builder --win --publish never
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
