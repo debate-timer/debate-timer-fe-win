@@ -5,9 +5,6 @@ name: build-windows
 # - 산출물은 Actions 아티팩트로 업로드되어 Windows 머신에서 바로 다운로드 가능
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'feat/#24-time-out-option'
 
 jobs:
   build:
