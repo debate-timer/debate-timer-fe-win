@@ -252,7 +252,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
    * 이 팀이 발언권을 넘긴(팀 전환으로 비활성화된) 시각을 기록
    */
   const markYielded = useCallback(() => {
-    lastYieldedAtRef.current = Date.now();
+    lastYieldedAtRef.current = monotonicNow();
   }, []);
 
   /**

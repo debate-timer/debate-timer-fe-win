@@ -19,6 +19,7 @@ import repository from '../../../repositories/IPCDebateTableRepository';
 import { UUID } from 'crypto';
 import useAsyncRequest from '../../../repositories/useAsyncRequest';
 import { useTimerBackground } from './useTimerBackground';
+import { monotonicNow } from '../../../util/time';
 
 // 팀 전환 후 같은 팀으로 되돌아온 것을 "실수/첨언"으로 간주하는 시간 임계값(ms)
 export const QUICK_RETURN_THRESHOLD_MS = 2000;
@@ -152,7 +153,7 @@ export function useTimerPageState(tableId: UUID) {
       speakingTimer: nextTimer.speakingTimer,
       isOpponentDone,
       lastYieldedAt: nextTimer.getLastYieldedAt(),
-      now: Date.now(),
+      now: monotonicNow(),
     });
 
     // 6. 이제 현재 타이머를 정지하고, 발언권을 넘긴 시각을 기록

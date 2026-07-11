@@ -179,7 +179,7 @@ describe('useTimeBasedTimer - 빠른 왕복 메커니즘', () => {
       result.current.markYielded();
     });
 
-    expect(result.current.getLastYieldedAt()).toBe(Date.now());
+    expect(result.current.getLastYieldedAt()).toBe(performance.now());
   });
 
   test('2-3. clearTimer가 발언권 넘긴 기록을 초기화한다(라운드 이동 시 stale 방지)', () => {
