@@ -103,7 +103,7 @@
           ]
         }
       ],
-      "icon": "public/dt-logo.png",
+      "icon": "public/dt-logo.ico",
       "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
     },
     "nsis": {
