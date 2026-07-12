@@ -11,6 +11,24 @@ interface UseBellSoundProps {
 }
 
 /**
+ * 자유토론(TimeBased) 타이머가 "종료"되어 종료 벨을 울려야 하는지 판단
+ * - 전체 시간(totalTimer) 소진은 항상 종료로 처리
+ * - 1회당 발언 시간(speakingTimer) 0 종료는 "시간초과 허용(allowOverflow)"이 꺼진 경우에만 종료로 처리
+ *   (allowOverflow가 켜져 있으면 발언 시간이 0을 지나 마이너스로 계속 흐르므로 종료가 아님)
+ */
+export function isTimeBasedTimerFinished(timer: {
+  isRunning: boolean;
+  speakingTimer: number | null;
+  totalTimer: number | null;
+  allowOverflow: boolean;
+}): boolean {
+  if (!timer.isRunning) return false;
+  if (timer.totalTimer === 0) return true;
+  if (!timer.allowOverflow && timer.speakingTimer === 0) return true;
+  return false;
+}
+
+/**
  * 토론 타이머에서 경고/종료 벨 사운드를 자동 재생해주는 커스텀 훅
  * - 타이머 상태 변화(30초, 0초 등)에 따라 지정된 벨 사운드가 한 번씩 재생됨
  */
@@ -92,9 +110,7 @@ export function useBellSound({
 
   // 종료음 조건 체크
   function checkTimerFinished(timer: TimeBasedTimerLogics) {
-    return (
-      timer.isRunning && (timer.speakingTimer === 0 || timer.totalTimer === 0)
-    );
+    return isTimeBasedTimerFinished(timer);
   }
   function checkNormalTimerFinished(timer: NormalTimerLogics) {
     return timer.isRunning && timer.timer === 0;

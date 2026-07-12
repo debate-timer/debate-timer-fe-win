@@ -5,6 +5,7 @@ import normalTimer from '../../../../assets/timer/normal_timer.png';
 import timeBasedTimer from '../../../../assets/timer/timebased_timer.png';
 import LabeledCheckbox from '../../../../components/LabledCheckBox/LabeledCheckbox';
 import timeBasedPerSpeakingTimer from '../../../../assets/timer/timebased_perSpeaking_timer.png';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 interface TimerCreationContentProps {
   beforeData?: TimeBoxInfo;
@@ -76,6 +77,13 @@ export default function TimerCreationContent({
     (beforeData?.timePerSpeaking ?? initData?.timePerSpeaking) != null,
   );
 
+  // 1회당 발언 시간 초과 허용 여부
+  const [allowSpeakingOverflow, setAllowSpeakingOverflow] = useState<boolean>(
+    beforeData?.allowSpeakingOverflow ??
+      initData?.allowSpeakingOverflow ??
+      false,
+  );
+
   const [speaker, setSpeaker] = useState<string>(
     beforeData?.speaker ?? initData?.speaker ?? '',
   );
@@ -130,6 +138,9 @@ export default function TimerCreationContent({
         timePerTeam: totalTimePerTeam,
         timePerSpeaking: useSpeakerTime ? totalTimePerSpeaking : null,
         speaker: null,
+        allowSpeakingOverflow: useSpeakerTime
+          ? allowSpeakingOverflow
+          : undefined,
       });
     }
     onClose();
@@ -139,6 +150,10 @@ export default function TimerCreationContent({
     value === '' ? 0 : Math.max(0, Math.min(59, Number(value)));
 
   const isNormalTimer = boxType === 'NORMAL';
+
+  // '시간초과 허용' 체크박스 노출 여부 (자유토론 + 1회당 발언 시간 사용 시)
+  // - 노출되면 폼이 한 줄 길어지므로 모달 높이를 늘려 버튼과의 간격을 확보한다
+  const showOverflowOption = !isNormalTimer && useSpeakerTime;
 
   // 자유토론 타이머로 전환되면 speechType 초기화
   useEffect(() => {
@@ -168,7 +183,11 @@ export default function TimerCreationContent({
   return (
     <div className="relative p-6">
       <div className="flex flex-col gap-1">
-        <div className="flex h-[280px] flex-row items-center justify-center p-2">
+        <div
+          className={`flex flex-row items-center justify-center p-2 transition-[height] duration-200 ${
+            showOverflowOption ? 'h-[340px]' : 'h-[280px]'
+          }`}
+        >
           <div className="flex h-[260px] w-[260px] justify-center">
             {/** 타이머 이미지 */}
             {isNormalTimer ? (
@@ -444,6 +463,28 @@ export default function TimerCreationContent({
                     </div>
                   </div>
                 </div>
+                {/** 시간초과 허용 (1회당 발언 시간 사용 시에만 노출) */}
+                {showOverflowOption && (
+                  <div className="flex w-full items-center space-x-1">
+                    <LabeledCheckbox
+                      id="overflow-toggle"
+                      label={
+                        <span className="ml-1 font-semibold">
+                          시간초과 허용
+                        </span>
+                      }
+                      checked={allowSpeakingOverflow}
+                      onChange={() => setAllowSpeakingOverflow((prev) => !prev)}
+                    />
+                    {/** 설명 아이콘 + hover 툴팁 */}
+                    <span className="group relative flex items-center">
+                      <IoInformationCircleOutline className="size-3.5 cursor-help text-neutral-400 hover:text-neutral-600" />
+                      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden w-[250px] -translate-x-1/2 rounded-md bg-neutral-800 px-3 py-2 text-xs font-normal leading-relaxed text-white shadow-lg group-hover:block">
+                        1회당 발언시간이 모두 소진된 이후에도 정지버튼을 누르기 전까지 타이머가 흐르는 옵션입니다.
+                      </span>
+                    </span>
+                  </div>
+                )}
               </>
             )}
 

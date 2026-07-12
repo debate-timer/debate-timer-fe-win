@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { OVERFLOW_FLOOR_SECONDS, monotonicNow } from '../../../util/time';
 
 /**
  * "일반 타이머" 기능을 제공하는 커스텀 훅
@@ -40,7 +41,7 @@ export function useNormalTimer(): NormalTimerLogics {
     // 예를 들어, 현재 시각이 오후 13시 00분 30초인데, 1회당 발언 시간이 30초라면,
     // 1회당 발언 시간이 모두 끝나는 시간은 13시 01분 00초이므로,
     // 해당 시간을 목표 시간으로 두는 식임
-    const startTime = Date.now();
+    const startTime = monotonicNow();
     targetTimeRef.current = startTime + timer * 1000;
 
     // isRunning 상태를 true로 바꿔주고 인터벌 처리
@@ -53,12 +54,17 @@ export function useNormalTimer(): NormalTimerLogics {
         return;
       }
 
-      // 현재 시각 확인
-      const now = Date.now();
+      // 현재 시각 확인 (단조 증가 시계 사용)
+      const now = monotonicNow();
 
       // 목표 시각까지 얼마나 더 필요한지, 남은 시간을 초 단위로 계산
       const remainingTotal = targetTimeRef.current - now;
-      const remainingSeconds = Math.ceil(remainingTotal / 1000);
+      // 하한 클램프: 초과 시간은 허용하되, 시계 이상 등으로 비정상적으로 큰 음수가 그대로
+      // 노출되지 않도록 방어한다.
+      const remainingSeconds = Math.max(
+        OVERFLOW_FLOOR_SECONDS,
+        Math.ceil(remainingTotal / 1000),
+      );
 
       // 계산한 남은 시간을 타이머에 반영
       setTimer(remainingSeconds);

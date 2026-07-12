@@ -6,6 +6,7 @@ import {
   Dispatch,
   SetStateAction,
 } from 'react';
+import { OVERFLOW_FLOOR_SECONDS, monotonicNow } from '../../../util/time';
 
 /**
  * 토론에서 사용하는 커스텀 타이머 훅
@@ -34,9 +35,17 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
   // 타이머가 0이 되면 true (완료 상태)
   const [isDone, setIsDone] = useState(false);
 
+  // 1회당 발언 시간(speakingTimer) 초과 허용 여부
+  // - true면 speakingTimer가 0 이하로도(마이너스) 계속 흐름
+  const [allowOverflow, setAllowOverflow] = useState(false);
+
   // 실제 시간 계산용 레퍼런스
   const targetTimeRef = useRef<number | null>(null);
   const speakingTargetTimeRef = useRef<number | null>(null);
+
+  // 이 팀이 마지막으로 발언권을 넘긴(팀 전환으로 비활성화된) 시각(ms)
+  // - 짧은 시간(2초) 내 다시 돌아왔는지 판단해 1회당 발언 시간 초기화 여부를 결정
+  const lastYieldedAtRef = useRef<number | null>(null);
 
   /**
    * 타이머 시작을 위해 사용하는 저수준 함수
@@ -52,8 +61,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
         return;
       }
 
-      // 현재 시각 확인
-      const now = Date.now();
+      // 현재 시각 확인 (단조 증가 시계 사용 — 벽시계 점프의 영향을 받지 않음)
+      const now = monotonicNow();
 
       // 목표 시각까지 얼마나 더 필요한지, 남은 시간을 초 단위로 계산
       const remainingTotal = targetTimeRef.current - now;
@@ -69,14 +78,19 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
         }
 
         const remainingSpeaking = speakingTargetTimeRef.current - now;
-        const remainingSpeakingSeconds = Math.max(
-          0,
-          Math.ceil(remainingSpeaking / 1000),
-        );
+        // 시간초과 허용 시에는 0에서 클램프하지 않고 마이너스로 계속 흐르게 함
+        // (일반 타이머 useNormalTimer와 동일한 방식)
+        // 단, 시계 이상 등으로 비정상적으로 큰 음수가 노출되지 않도록 하한 클램프로 방어
+        const remainingSpeakingSeconds = allowOverflow
+          ? Math.max(
+              OVERFLOW_FLOOR_SECONDS,
+              Math.ceil(remainingSpeaking / 1000),
+            )
+          : Math.max(0, Math.ceil(remainingSpeaking / 1000));
         setSpeakingTimer(remainingSpeakingSeconds);
       }
     }, 200);
-  }, [isSpeakingTimerAvailable]);
+  }, [isSpeakingTimerAvailable, allowOverflow]);
 
   /**
    * 타이머 카운트다운 시작
@@ -93,7 +107,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     // 예를 들어, 현재 시각이 오후 13시 00분 30초인데, 1회당 발언 시간이 30초라면,
     // 1회당 발언 시간이 모두 끝나는 시간은 13시 01분 00초이므로,
     // 해당 시간을 목표 시간으로 두는 식임
-    const startTime = Date.now();
+    const startTime = monotonicNow();
     targetTimeRef.current = startTime + totalTimer * 1000;
     if (isSpeakingTimerAvailable) {
       speakingTargetTimeRef.current = startTime + speakingTimer * 1000;
@@ -216,7 +230,7 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
       // 예를 들어, 현재 시각이 오후 13시 00분 30초인데, 1회당 발언 시간이 30초라면,
       // 1회당 발언 시간이 모두 끝나는 시간은 13시 01분 00초이므로,
       // 해당 시간을 목표 시간으로 두는 식임
-      const startTime = Date.now();
+      const startTime = monotonicNow();
       targetTimeRef.current = startTime + totalTimer * 1000;
       if (isSpeakingTimerAvailable) {
         speakingTargetTimeRef.current = startTime + newTime * 1000;
@@ -233,6 +247,18 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
       totalTimer,
     ],
   );
+
+  /**
+   * 이 팀이 발언권을 넘긴(팀 전환으로 비활성화된) 시각을 기록
+   */
+  const markYielded = useCallback(() => {
+    lastYieldedAtRef.current = monotonicNow();
+  }, []);
+
+  /**
+   * 마지막으로 발언권을 넘긴 시각 조회 (없으면 null)
+   */
+  const getLastYieldedAt = useCallback(() => lastYieldedAtRef.current, []);
 
   /**
    * 외부에서 전체/발언 타이머를 지정값으로 재설정
@@ -258,6 +284,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     setSpeakingTimer(null);
     setIsDone(false);
     intervalRef.current = null;
+    // 라운드/발언칸 전환 시 이전 기록으로 인한 오작동 방지
+    lastYieldedAtRef.current = null;
   }, [pauseTimer]);
 
   useEffect(() => () => pauseTimer(), [pauseTimer]);
@@ -269,6 +297,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     isDone,
     defaultTime,
     isSpeakingTimerAvailable,
+    allowOverflow,
+    setAllowOverflow,
     startTimer,
     pauseTimer,
     resetTimerForNextPhase,
@@ -278,6 +308,8 @@ export function useTimeBasedTimer(): TimeBasedTimerLogics {
     setDefaultTime,
     setIsDone,
     clearTimer,
+    markYielded,
+    getLastYieldedAt,
   };
 }
 
@@ -291,6 +323,8 @@ export interface TimeBasedTimerLogics {
     defaultSpeakingTimer: number | null;
   };
   isSpeakingTimerAvailable: boolean;
+  allowOverflow: boolean;
+  setAllowOverflow: Dispatch<SetStateAction<boolean>>;
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimerForNextPhase: (isOpponentDone: boolean) => number;
@@ -305,4 +339,6 @@ export interface TimeBasedTimerLogics {
   >;
   setIsDone: Dispatch<SetStateAction<boolean>>;
   clearTimer: () => void;
+  markYielded: () => void;
+  getLastYieldedAt: () => number | null;
 }
