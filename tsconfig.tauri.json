@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tauri.tsbuildinfo",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
+  },
+  "include": [
+    "vite.config.tauri.mts",
+    "src-tauri/frontend/**/*.ts",
+    "src/renderer.d.ts"
+  ]
+}

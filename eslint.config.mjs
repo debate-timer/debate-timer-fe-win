@@ -26,7 +26,12 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   // 기본 설정 옵션
   {
-    ignores: ['dist', 'public/mockServiceWorker.js'], // 배포 디렉터리(dist) 제외
+    ignores: [
+      'dist',
+      'src-tauri/target',
+      'src-tauri/gen/schemas',
+      'public/mockServiceWorker.js',
+    ], // 생성된 배포 및 Tauri 빌드 디렉터리 제외
   },
   {
     // 확장 규칙 설정
