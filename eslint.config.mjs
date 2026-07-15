@@ -22,6 +22,9 @@ import prettierConfig from 'eslint-config-prettier';
 // TypeScript 관련 플러그인 및 설정
 import tseslint from 'typescript-eslint';
 
+// Tailwind CSS 설정
+import tailwindConfig from './tailwind.config.mjs';
+
 // ESLint 구성 내보내기
 export default tseslint.config(
   // 기본 설정 옵션
@@ -83,7 +86,7 @@ export default tseslint.config(
         version: 'detect',
       },
       tailwindcss: {
-        config: './tailwind.config.js', // Tailwind 설정 파일 위치 지정
+        config: tailwindConfig, // 경로 해석 없이 Tailwind 설정 객체를 직접 전달
       },
     },
   },
