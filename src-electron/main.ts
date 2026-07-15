@@ -61,7 +61,7 @@ async function initDb() {
 // - Below are functions that CAN be exposed to the renderer(React)
 // - And it means that you should explicitly specify functions
 //   that you want to expose to the renderer(React)
-//   in 'electron/preload.ts'.
+//   in 'src-electron/preload.ts'.
 
 // GET
 ipcMain.handle(

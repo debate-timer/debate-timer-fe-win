@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 import { DebateTableData } from './type/type';
 
-// Declared same types from electron/preload.ts
+// Declared same types from src-electron/preload.ts
 // to keep type consistency between the renderer side and the main side
 export interface DB_API {
   get: (id: UUID) => Promise<DebateTableData>;
