@@ -1,0 +1,7 @@
+{
+  "identifier": "default",
+  "description": "Minimal permissions for the Debate Timer main window",
+  "windows": ["main"],
+  "permissions": ["core:default"],
+  "platforms": ["windows"]
+}

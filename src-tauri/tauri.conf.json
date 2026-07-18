@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "디베이트 타이머",
+  "mainBinaryName": "Debate Timer (Tauri)",
+  "version": "../package.json",
+  "identifier": "com.debatetimer.app.tauri",
+  "build": {
+    "beforeDevCommand": "npm run tauri:frontend:dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run tauri:frontend:build",
+    "frontendDist": "../dist/tauri-renderer"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "디베이트 타이머",
+        "width": 1280,
+        "height": 864,
+        "minWidth": 1280,
+        "minHeight": 864,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["../public/dt-logo.ico"],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "../public/dt-logo.ico",
+        "uninstallerIcon": "../public/dt-logo.ico"
+      }
+    }
+  }
+}

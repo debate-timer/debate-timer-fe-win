@@ -9,7 +9,7 @@ const viteConfig = defineViteConfig(() => {
       react(),
       electron([
         {
-          entry: './electron/main.ts',
+          entry: './src-electron/main.ts',
           vite: {
             build: {
               outDir: 'dist/main',
@@ -22,7 +22,7 @@ const viteConfig = defineViteConfig(() => {
           },
         },
         {
-          entry: './electron/preload.ts',
+          entry: './src-electron/preload.ts',
           vite: {
             build: {
               outDir: 'dist/preload',
